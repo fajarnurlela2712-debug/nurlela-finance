@@ -183,14 +183,12 @@
         </header>
 
         <main class="app-container">
-            <!-- PANEL MONITORING ADMIN -->
             <section id="admin-panel">
                 <div class="section-title" style="color: var(--admin-color);">Panel Utama Eksekutif Admin</div>
                 <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 15px;">Memonitor seluruh aktivitas transaksi pengguna secara real-time.</div>
                 <div id="admin-user-list" class="tx-list"></div>
             </section>
 
-            <!-- KARTU SALDO UTAMA -->
             <section class="balance-card">
                 <div class="bal-label">Total Saldo Dompet</div>
                 <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -212,7 +210,6 @@
                 </div>
             </section>
 
-            <!-- FORM TRANSAKSI BARU -->
             <section class="form-section">
                 <div id="form-title" class="section-title">Catat Transaksi Finansial</div>
                 <input type="hidden" id="tx-edit-id">
@@ -235,7 +232,6 @@
                 <button id="btn-cancel-edit" class="btn-submit" style="background: #475569; margin-top: 10px; display: none;" onclick="resetFormTransaksi()">Batalkan Perubahan</button>
             </section>
 
-            <!-- RIWAYAT TRANSAKSI -->
             <section class="history-section">
                 <div class="section-title">Riwayat Arus Kas Real-time</div>
                 <div id="transaction-container" class="tx-list">
@@ -244,8 +240,7 @@
             </section>
         </main>
     </div>
-        <!-- KONEKSI SDK FIREBASE CORE DAN DATABASE -->
-    <script src="https://gstatic.com"></script>
+        <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
 
     <script>
@@ -334,15 +329,11 @@
                 function cekPertanyaanPemulihan() {
             const user = document.getElementById('reset-user').value.trim().toLowerCase();
             if (!user) return alert('Masukkan username pelacakan!');
-
             database.ref('users/' + user).once('value', snapshot => {
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    document.getElementById('lbl-question').innerText = `Pertanyaan Keamanan: "${data.question}"`;
+                    document.getElementById('lbl-question').innerText = `Pertanyaan Keamanan: "${snapshot.val().question}"`;
                     document.getElementById('security-question-area').style.display = 'block';
-                } else {
-                    alert('Username tidak ditemukan!');
-                }
+                } else { alert('Username tidak ditemukan!'); }
             });
         }
 
@@ -350,20 +341,14 @@
             const user = document.getElementById('reset-user').value.trim().toLowerCase();
             const answer = document.getElementById('reset-answer').value.trim().toLowerCase();
             const newPass = document.getElementById('reset-new-pass').value;
-
             if (!answer || !newPass) return alert('Isi jawaban verifikasi dan kata sandi baru!');
-
             database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    if (snapshot.val().answer === answer) {
-                        database.ref('users/' + user + '/password').set(newPass).then(() => {
-                            alert('Kata sandi diperbarui! Silakan login.');
-                            beralihMenuAuth('masuk');
-                        });
-                    } else {
-                        alert('Jawaban pemulihan salah!');
-                    }
-                }
+                if (snapshot.exists() && snapshot.val().answer === answer) {
+                    database.ref('users/' + user + '/password').set(newPass).then(() => {
+                        alert('Kata sandi diperbarui!');
+                        beralihMenuAuth('masuk');
+                    });
+                } else { alert('Jawaban pemulihan salah!'); }
             });
         }
 
@@ -371,190 +356,14 @@
             sesiPenggunaAktif = username;
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            
-            const badge = document.getElementById('user-badge-display');
-            badge.innerText = username.toUpperCase();
-            
-            if (role === 'admin') {
-                badge.classList.add('admin-badge');
-                document.getElementById('admin-panel').style.display = 'block';
-                sinkronisasiDataAdmin();
-            } else {
-                badge.classList.remove('admin-badge');
-                document.getElementById('admin-panel').style.display = 'none';
-                sinkronisasiDataTransaksiUser(username);
-            }
-        }
-
-        function formatRupiah(angka) {
-            return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
-        }
-
-        function sinkronisasiDataTransaksiUser(username) {
-            database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => {
-                const container = document.getElementById('transaction-container');
-                container.innerHTML = '';
-                
-                if (!snapshot.exists()) {
-                    container.innerHTML = '<div class="no-data">Belum ada aktivitas transaksi terekam.</div>';
-                    kalkulasiUlangMataUang({});
-                    return;
-                }
-
-                dataTransaksiLokal = snapshot.val();
-                kalkulasiUlangMataUang(dataTransaksiLokal);
-
-                const items = [];
-                snapshot.forEach(childSnapshot => {
-                    items.unshift({ id: childSnapshot.key, ...childSnapshot.val() });
-                });
-
-                items.forEach(tx => {
-                    const isIncome = tx.type === 'income';
-                    const div = document.createElement('div');
-                    div.className = 'tx-item';
-                    div.innerHTML = `
-                        <div class="tx-left">
-                            <span class="tx-desc">${tx.description}</span>
-                            <span class="tx-date">${tx.date}</span>
-                        </div>
-                        <div class="tx-right">
-                            <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">
-                                ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
-                            </span>
-                            <div class="action-btns">
-                                <button class="btn-action btn-edit" onclick="siapkanEditTransaksi('${tx.id}')">✏️</button>
-                                <button class="btn-action btn-del" onclick="hapusTransaksiSistem('${tx.id}')">🗑️</button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            });
-            }
-                function kalkulasiUlangMataUang(data) {
-            let totalMasuk = 0, totalKeluar = 0;
-            Object.values(data).forEach(tx => {
-                if (tx.type === 'income') totalMasuk += parseInt(tx.amount);
-                else totalKeluar += parseInt(tx.amount);
-            });
-            const sisaSaldo = totalMasuk - totalKeluar;
-
-            document.getElementById('total-balance').innerText = formatRupiah(sisaSaldo);
-            document.getElementById('total-income').innerText = formatRupiah(totalMasuk);
-            document.getElementById('total-expense').innerText = formatRupiah(totalKeluar);
-        }
-
-        function simpanTransaksiSistem() {
-            const desc = document.getElementById('tx-desc').value.trim();
-            const amount = document.getElementById('tx-amount').value;
-            const type = document.getElementById('tx-type').value;
-            const editId = document.getElementById('tx-edit-id').value;
-
-            if (!desc || !amount) return alert('Lengkapi semua parameter formulir transaksi!');
-
-            const paketData = {
-                description: desc,
-                amount: parseInt(amount),
-                type: type,
-                owner: sesiPenggunaAktif,
-                date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
-            };
-
-            if (editId) {
-                database.ref('transactions/' + editId).update(paketData).then(() => {
-                    resetFormTransaksi();
-                });
-            } else {
-                database.ref('transactions').push(paketData).then(() => {
-                    resetFormTransaksi();
-                });
-            }
-        }
-
-        window.siapkanEditTransaksi = function(id) {
-            const tx = dataTransaksiLokal[id];
-            if (!tx) return;
-
-            document.getElementById('form-title').innerText = 'Perbarui Transaksi Terpilih';
-            document.getElementById('tx-edit-id').value = id;
-            document.getElementById('tx-desc').value = tx.description;
-            document.getElementById('tx-amount').value = tx.amount;
-            document.getElementById('tx-type').value = tx.type;
-            
-            document.getElementById('btn-save-tx').innerText = 'Simpan Perubahan';
-            document.getElementById('btn-cancel-edit').style.display = 'block';
-        }
-
-        function resetFormTransaksi() {
-            document.getElementById('form-title').innerText = 'Catat Transaksi Finansial';
-            document.getElementById('tx-edit-id').value = '';
-            document.getElementById('tx-desc').value = '';
-            document.getElementById('tx-amount').value = '';
-            document.getElementById('tx-type').value = 'income';
-            
-            document.getElementById('btn-save-tx').innerText = 'Simpan Catatan Transaksi';
-            document.getElementById('btn-cancel-edit').style.display = 'none';
-        }
-
-        window.hapusTransaksiSistem = function(id) {
-            if (confirm('Hapus arsip catatan riwayat transaksi ini secara permanen?')) {
-                database.ref('transactions/' + id).remove();
-            }
-        }
-
-        function sinkronisasiDataAdmin() {
-            database.ref('transactions').on('value', snapshotAdmin => {
-                const adminList = document.getElementById('admin-user-list');
-                adminList.innerHTML = '';
-                
-                if (!snapshotAdmin.exists()) {
-                    adminList.innerHTML = '<div class="no-data">Sistem bersih dari mutasi transaksi pengguna luar.</div>';
-                    kalkulasiUlangMataUang({});
-                    return;
-                }
-
-                const semuaTransaksi = snapshotAdmin.val();
-                kalkulasiUlangMataUang(semuaTransaksi);
-
-                snapshotAdmin.forEach(child => {
-                    const tx = child.val();
-                    const isIncome = tx.type === 'income';
-                    const div = document.createElement('div');
-                    div.className = 'tx-item';
-                    div.style.borderLeft = `4px solid ${isIncome ? 'var(--success)' : 'var(--danger)'}`;
-                    div.innerHTML = `
-                        <div class="tx-left">
-                            <span class="tx-desc">${tx.description}</span>
-                            <div>
-                                <span class="tx-owner">USER: ${tx.owner.toUpperCase()}</span>
-                                <span class="tx-date" style="margin-left: 8px;">${tx.date}</span>
-                            </div>
-                        </div>
-                        <div class="tx-right">
-                            <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">
-                                ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
-                            </span>
-                            <button class="btn-action btn-del" onclick="hapusTransaksiSistem('${child.key}')">🗑️</button>
-                        </div>
-                    `;
-                    adminList.appendChild(div);
-                });
-            });
+            document.getElementById('user-badge-display').innerText = username.toUpperCase();
+            alert('Selamat Datang! Login Berhasil.');
         }
 
         function logoutSistem() {
-            if (sesiPenggunaAktif) {
-                database.ref('transactions').off();
-                database.ref('users/' + sesiPenggunaAktif).off();
-            }
             sesiPenggunaAktif = null;
-            dataTransaksiLokal = {};
-            
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
-            resetFormTransaksi();
-
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('auth-screen').style.display = 'flex';
             beralihMenuAuth('masuk');
