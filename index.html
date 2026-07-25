@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nurlela Finance</title>
+    <!-- SKRIP FIREBASE HARUS DI LOAD DI HEAD AGAR TIDAK NOT DEFINED -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
     <style>
         :root { --bg-main: #060913; --bg-card: #111a2e; --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; --text: #f8fafc; --text-muted: #64748b; }
         body { margin: 0; background-color: var(--bg-main); color: var(--text); font-family: sans-serif; padding-bottom: 30px; }
@@ -13,21 +16,18 @@
         .auth-title span { color: var(--primary); }
         .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
         .link { color: var(--primary); cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; font-weight: 600; }
-        
         #main-app { display: none; padding: 20px; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-size: 20px; font-weight: 800; }
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
         .btn-logout { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
-        
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px; padding: 25px; margin-top: 20px; }
         .bal-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
         .bal-amount { font-size: 32px; font-weight: 700; margin: 8px 0 20px 0; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .stat-val { font-size: 16px; font-weight: 600; }
         .amt-inc { color: var(--success); } .amt-exp { color: var(--danger); }
-        
         .form-section, .history-section { margin-top: 30px; }
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
         .input-group { margin-bottom: 15px; }
@@ -35,7 +35,6 @@
         input, select { width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none; }
         input:focus, select:focus { border-color: var(--primary); }
         .btn-submit { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; }
-        
         .tx-list { display: flex; flex-direction: column; gap: 10px; }
         .tx-item { background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .tx-left { display: flex; flex-direction: column; gap: 4px; text-align: left; }
@@ -131,11 +130,7 @@
             </div>
         </section>
     </div>
-        <!-- PUSTAKA INTI FIREBASE WAJIB BERADA DI LUAR TAG SCRIPT UTAMA -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    
-    <script>
+        <script>
         window.onerror = function(msg, url, linenumber) {
             alert('Laporan Masalah: ' + msg + '\nBaris: ' + linenumber);
             return true;
