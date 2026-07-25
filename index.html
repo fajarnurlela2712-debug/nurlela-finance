@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nurlela Finance</title>
-    <!-- SKRIP FIREBASE HARUS DI LOAD DI HEAD AGAR TIDAK NOT DEFINED -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
     <style>
         :root { --bg-main: #060913; --bg-card: #111a2e; --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; --text: #f8fafc; --text-muted: #64748b; }
         body { margin: 0; background-color: var(--bg-main); color: var(--text); font-family: sans-serif; padding-bottom: 30px; }
         #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-main); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
-        .auth-box { background-color: var(--bg-card); padding: 30px; border-radius: 24px; width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .auth-box { background-color: var(--bg-card); padding: 30px; border-radius: 24px; width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05); text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
         .auth-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
         .auth-title span { color: var(--primary); }
         .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
@@ -30,7 +27,7 @@
         .amt-inc { color: var(--success); } .amt-exp { color: var(--danger); }
         .form-section, .history-section { margin-top: 30px; }
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
         input, select { width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none; }
         input:focus, select:focus { border-color: var(--primary); }
@@ -59,7 +56,6 @@
                 <span class="link" onclick="toggleAuth('daftar')">Belum punya dompet? Daftar Akun Baru</span>
             </div>
         </div>
-
         <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
@@ -74,8 +70,7 @@
             </div>
         </div>
     </div>
-
-    <!-- DASHBOARD UTAMA APLIKASI -->
+    <!-- DASHBOARD UTAMA -->
     <div id="main-app">
         <header class="header">
             <div class="logo">Nurlela<span>Finance</span></div>
@@ -84,8 +79,6 @@
                 <button class="btn-logout" style="margin-left: 10px;" onclick="logoutSistem()">Keluar Sesi</button>
             </div>
         </header>
-
-        <!-- KARTU SALDO UTAMA -->
         <section class="balance-card">
             <div class="bal-label">Total Saldo Dompet</div>
             <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -100,13 +93,11 @@
                 </div>
             </div>
         </section>
-
-        <!-- FORM INPUT TRANSAKSI BARU -->
         <section class="form-section">
             <div class="section-title">Catat Transaksi Finansial</div>
             <div class="input-group">
                 <label>Deskripsi Keperluan</label>
-                <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan, Gaji Pokok" autocomplete="off">
+                <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan" autocomplete="off">
             </div>
             <div class="input-group">
                 <label>Nominal Finansial (Rupiah)</label>
@@ -121,8 +112,6 @@
             </div>
             <button class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
         </section>
-
-        <!-- RIWAYAT ARUS KAS -->
         <section class="history-section">
             <div class="section-title">Riwayat Arus Kas Real-time</div>
             <div id="transaction-container" class="tx-list">
@@ -130,16 +119,13 @@
             </div>
         </section>
     </div>
-        <script>
-        window.onerror = function(msg, url, linenumber) {
-            alert('Laporan Masalah: ' + msg + '\nBaris: ' + linenumber);
-            return true;
-        };
-
-        var database;
+        <!-- PEMANGGILAN DATABASE STABIL CDN (MEMPERBAIKI ERROR NOT DEFINED) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <script>
+        var db;
         let sesiPenggunaAktif = null;
         let dataTransaksiLokal = {};
-        let perananUser = "user";
 
         try {
             const firebaseConfig = {
@@ -149,9 +135,9 @@
                 projectId: "nurlela-finance"
             };
             firebase.initializeApp(firebaseConfig);
-            database = firebase.database();
+            db = firebase.database();
         } catch (e) {
-            alert('Firebase gagal terkoneksi: ' + e.message);
+            console.log('Firebase init error: ' + e.message);
         }
 
         function toggleAuth(menu) {
@@ -160,19 +146,19 @@
         }
 
         function eksekusiDaftarSistem() {
-            const user = document.getElementById('reg-user').value.trim().toLowerCase();
-            const pass = document.getElementById('reg-pass').value;
+            const u = document.getElementById('reg-user').value.trim().toLowerCase();
+            const p = document.getElementById('reg-pass').value;
             const q = document.getElementById('reg-q').value.trim();
             const a = document.getElementById('reg-a').value.trim().toLowerCase();
 
-            if (!user || !pass || !q || !a) return alert('Mohon isi semua data formulir!');
-            if (user === 'admin') return alert('Username "admin" dilindungi!');
+            if (!u || !p || !q || !a) return alert('Mohon isi semua data formulir!');
+            if (u === 'admin') return alert('Username "admin" dilindungi!');
 
-            database.ref('users/' + user).once('value', snapshot => {
+            db.ref('users/' + u).once('value', snapshot => {
                 if (snapshot.exists()) {
                     alert('Username sudah terdaftar!');
                 } else {
-                    database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
+                    db.ref('users/' + u).set({ password: p, question: q, answer: a, role: 'user' }).then(() => {
                         alert('Akun Sukses Dibuat! Silakan Masuk.');
                         toggleAuth('login');
                     });
@@ -181,19 +167,19 @@
         }
 
         function eksekusiLoginSistem() {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
+            const u = document.getElementById('login-user').value.trim().toLowerCase();
+            const p = document.getElementById('login-pass').value;
 
-            if (!user || !pass) return alert('Username & Password harus diisi!');
+            if (!u || !p) return alert('Username & Password harus diisi!');
 
-            if (user === 'admin' && pass === 'AdminSuperPass123!') {
+            if (u === 'admin' && p === 'AdminSuperPass123!') {
                 inisialisasiSesiSistem('admin', 'admin');
                 return;
             }
 
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val().password === pass) {
-                    inisialisasiSesiSistem(user, snapshot.val().role || 'user');
+            db.ref('users/' + u).once('value', snapshot => {
+                if (snapshot.exists() && snapshot.val().password === p) {
+                    inisialisasiSesiSistem(u, snapshot.val().role || 'user');
                 } else {
                     alert('Username atau Password Salah!');
                 }
@@ -202,15 +188,14 @@
 
         function inisialisasiSesiSistem(username, role) {
             sesiPenggunaAktif = username;
-            perananUser = role;
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-badge-display').innerText = username.toUpperCase();
 
             if (role === 'admin') {
-                database.ref('transactions').on('value', snapshot => { prosesDataTransaksi(snapshot); });
+                db.ref('transactions').on('value', snapshot => { prosesDataTransaksi(snapshot); });
             } else {
-                database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => { prosesDataTransaksi(snapshot); });
+                db.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => { prosesDataTransaksi(snapshot); });
             }
         }
 
@@ -260,7 +245,7 @@
             const type = document.getElementById('tx-type').value;
             if (!desc || !amount) return alert('Isi deskripsi dan nominal!');
             const paketData = { description: desc, amount: parseInt(amount), type: type, owner: sesiPenggunaAktif, date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) };
-            database.ref('transactions').push(paketData).then(() => {
+            db.ref('transactions').push(paketData).then(() => {
                 document.getElementById('tx-desc').value = '';
                 document.getElementById('tx-amount').value = '';
                 alert('Transaksi Berhasil Tersimpan!');
@@ -268,13 +253,13 @@
         }
 
         function hapusTransaksi(id) {
-            if (confirm('Hapus riwayat transaksi ini?')) { database.ref('transactions/' + id).remove(); }
+            if (confirm('Hapus riwayat transaksi ini?')) { db.ref('transactions/' + id).remove(); }
         }
 
         function formatRupiah(angka) { return 'Rp ' + parseInt(angka).toLocaleString('id-ID'); }
 
         function logoutSistem() {
-            database.ref('transactions').off();
+            db.ref('transactions').off();
             sesiPenggunaAktif = null;
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
