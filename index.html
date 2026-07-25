@@ -3,146 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nurlela Finance</title>
+    <title>Nurlela Finance - Firebase Enterprise Wallet</title>
     <style>
-        body { margin: 0; background-color: #060913; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .box { background-color: #111a2e; padding: 30px; border-radius: 24px; width: 100%; max-width: 320px; box-sizing: border-box; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-        .title { font-size: 22px; font-weight: 800; margin-bottom: 20px; }
-        .title span { color: #38bdf8; }
-        input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none; }
-        input:focus { border-color: #38bdf8; }
-        .btn { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
-        .link { color: #38bdf8; cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; font-weight: 600; }
+        :root {
+            --bg-main: #060913;
+            --bg-card: #111a2e;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --text: #f8fafc;
+            --text-muted: #64748b;
+        }
+        body {
+            margin: 0; background-color: var(--bg-main); color: var(--text);
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
+        }
+        #auth-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-main); z-index: 100; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; 
+            padding: 15px; box-sizing: border-box; overflow-y: auto;
+        }
+        .auth-box {
+            background-color: var(--bg-card); padding: 30px; border-radius: 24px;
+            width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6); box-sizing: border-box; text-align: center;
+        }
+        .auth-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+        .auth-title span { color: var(--primary); }
+        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px; }
+        .link { color: var(--primary); cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; font-weight: 600; }
+        
+        #main-app { display: none; padding: 20px; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .logo { font-size: 20px; font-weight: 800; }
+        .logo span { color: var(--primary); }
+        .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        .btn-logout { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        
+        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px; padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
+        .bal-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .bal-amount { font-size: 32px; font-weight: 700; margin: 8px 0 20px 0; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+        .amt-inc { color: var(--success); } .amt-exp { color: var(--danger); }
+        
+        .form-section, .history-section { margin-top: 30px; }
+        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+        
+        input, select { width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none; }
+        input:focus, select:focus { border-color: var(--primary); }
+        .btn-submit { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
+        
+        .tx-list { display: flex; flex-direction: column; gap: 10px; }
+        .tx-item { background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tx-left { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+        .tx-desc { font-size: 15px; font-weight: 600; }
+        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; width: max-content; }
+        .tx-date { font-size: 12px; color: #94a3b8; margin-left: 6px; }
+        .tx-right { display: flex; align-items: center; gap: 12px; }
+        .tx-amount { font-size: 15px; font-weight: 700; }
+        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 16px; padding: 4px; }
+        .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
     </style>
 </head>
 <body>
-    <!-- FORM LOGIN UTAMA -->
-    <div id="div-login" class="box">
-        <div class="title">Nurlela<span>Finance</span></div>
-        <input type="text" id="log-user" placeholder="Username Anda" autocomplete="off">
-        <input type="password" id="log-pass" placeholder="Kata Sandi Keamanan">
-        <button class="btn" onclick="login()">Masuk Sesi Aman</button>
-        <span class="link" onclick="toggle('daftar')">Belum punya dompet? Daftar Baru</span>
+    <div id="auth-screen">
+        <!-- FORM LOGIN -->
+        <div id="login-box" class="auth-box">
+            <div class="auth-title">Nurlela<span>Finance</span></div>
+            <div class="auth-subtitle">Firebase Real-time Wallet</div>
+            <input type="text" id="login-user" placeholder="Username Anda" style="margin-bottom: 12px;" autocomplete="off">
+            <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
+            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
+            <div style="margin-top: 20px;">
+                <span class="link" onclick="toggleAuth('daftar')">Belum punya dompet? Daftar Akun Baru</span>
+            </div>
+        </div>
+
+        <!-- FORM DAFTAR BARU (SINKRON ID 100%) -->
+        <div id="register-box" class="auth-box" style="display: none;">
+            <div class="auth-title">Create<span>Account</span></div>
+            <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
+            <input type="text" id="reg-user" placeholder="Buat Username Unik" style="margin-bottom: 12px;" autocomplete="off">
+            <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat" style="margin-bottom: 12px;">
+            <input type="text" id="reg-q" placeholder="Pertanyaan Pemulihan" style="margin-bottom: 12px;">
+            <input type="text" id="reg-a" placeholder="Jawaban Kunci Rahasia">
+            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Daftar & Buat Dompet</button>
+            <div style="margin-top: 20px;">
+                <span class="link" onclick="toggleAuth('login')">Sudah memiliki akun? Masuk ke Sesi</span>
+            </div>
+        </div>
     </div>
 
-    <!-- FORM PENDAFTARAN AKUN BARU -->
-    <div id="div-daftar" class="box" style="display: none;">
-        <div class="title">Create<span>Account</span></div>
-        <input type="text" id="reg-user" placeholder="Buat Username Unik" autocomplete="off">
-        <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat">
-        <input type="text" id="reg-q" placeholder="Pertanyaan Keamanan Pemulihan">
-        <input type="text" id="reg-a" placeholder="Jawaban Kunci Rahasia Anda">
-        <button class="btn" onclick="daftar()">Daftar & Buat Dompet</button>
-        <span class="link" onclick="toggle('login')">Sudah punya akun? Masuk</span>
-    </div>
+    <!-- DASHBOARD UTAMA APLIKASI -->
+    <div id="main-app">
+        <header class="header">
+            <div class="logo">Nurlela<span>Finance</span></div>
+            <div>
+                <span id="user-badge-display" class="user-badge">USER</span>
+                <button class="btn-logout" style="margin-left: 10px;" onclick="logoutSistem()">Keluar Sesi</button>
+            </div>
+        </header>
 
-    <!-- HALAMAN UTAMA DASBOR FINANSIAL -->
-    <div id="div-app" class="box" style="display: none;">
-        <div class="title">Selamat Datang!</div>
-        <div id="user-badge" style="font-size: 18px; color: #38bdf8; margin-bottom: 20px; font-weight: bold;"></div>
-        <div style="font-size: 14px; color: #64748b; margin-bottom: 25px;">Sistem basis data terhubung langsung secara aman.</div>
-        <button class="btn" style="background: #f43f5e;" onclick="logout()">Keluar Sesi</button>
+        <!-- KARTU SALDO UTAMA -->
+        <section class="balance-card">
+            <div class="bal-label">Total Saldo Dompet</div>
+            <div id="total-balance" class="bal-amount">Rp 0</div>
+            <div class="stats-grid">
+                <div>
+                    <div class="bal-label" style="font-size: 11px;">Pemasukan</div>
+                    <div id="total-income" class="stat-val amt-inc">Rp 0</div>
+                </div>
+                <div>
+                    <div class="bal-label" style="font-size: 11px;">Pengeluaran</div>
+                    <div id="total-expense" class="stat-val amt-exp">Rp 0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FORM INPUT TRANSAKSI BARU -->
+        <section class="form-section">
+            <div class="section-title">Catat Transaksi Finansial</div>
+            <div class="input-group">
+                <label>Deskripsi Keperluan</label>
+                <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan, Gaji Pokok" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Nominal Finansial (Rupiah)</label>
+                <input type="number" id="tx-amount" placeholder="Contoh: 50000">
+            </div>
+            <div class="input-group">
+                <label>Jenis Transaksi Dompet</label>
+                <select id="tx-type">
+                    <option value="income">Pemasukan (Income)</option>
+                    <option value="expense">Pengeluaran (Expense)</option>
+                </select>
+            </div>
+            <button class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
+        </section>
+
+        <!-- RIWAYAT ARUS KAS -->
+        <section class="history-section">
+            <div class="section-title">Riwayat Arus Kas Real-time</div>
+            <div id="transaction-container" class="tx-list">
+                <div class="no-data">Belum ada aktivitas transaksi terekam.</div>
+            </div>
+        </section>
     </div>
-        <!-- DATABASE CORE ENGINE SDK -->
+        <!-- DATABASE SDK ENGINE CORE -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
+    
     <script>
-        // Detektor error browser otomatis untuk debugging langsung di layar HP
-        window.onerror = function(msg, url, linenumber) {
-            alert('Deteksi Error Browser: ' + msg + '\nBaris: ' + linenumber);
-            return true;
+        // KREDENSIAL UTAMA SERVER REAL-TIME DATABASE SINGAPORE ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebasedatabase.app",
+            projectId: "nurlela-finance"
         };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        try {
-            const firebaseConfig = {
-                apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
-                authDomain: "://firebaseapp.com",
-                databaseURL: "https://firebasedatabase.app",
-                projectId: "nurlela-finance"
-            };
-            firebase.initializeApp(firebaseConfig);
-            var db = firebase.database();
-        } catch (e) {
-            alert('Gagal inisialisasi Firebase: ' + e.message);
+        let sesiPenggunaAktif = null;
+        let dataTransaksiLokal = {};
+        let perananUser = "user";
+
+        function toggleAuth(menu) {
+            document.getElementById('login-box').style.display = menu === 'daftar' ? 'none' : 'block';
+            document.getElementById('register-box').style.display = menu === 'daftar' ? 'block' : 'none';
         }
 
-        function toggle(menu) {
-            document.getElementById('div-login').style.display = menu === 'daftar' ? 'none' : 'block';
-            document.getElementById('div-daftar').style.display = menu === 'daftar' ? 'block' : 'none';
-        }
+        function eksekusiDaftarSistem() {
+            const user = document.getElementById('reg-user').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value;
+            const q = document.getElementById('reg-q').value.trim();
+            const a = document.getElementById('reg-a').value.trim().toLowerCase();
 
-        function daftar() {
-            try {
-                const u = document.getElementById('reg-user').value.trim().toLowerCase();
-                const p = document.getElementById('reg-pass').value;
-                const q = document.getElementById('reg-q').value.trim();
-                const a = document.getElementById('reg-a').value.trim().toLowerCase();
+            if (!user || !pass || !q || !a) return alert('Lengkapi semua bidang pendaftaran!');
+            if (user === 'admin') return alert('Username "admin" dilindungi otoritas!');
 
-                if (!u || !p || !q || !a) return alert('Mohon isi semua data formulir!');
-                if (u === 'admin') return alert('Username "admin" tidak boleh didaftarkan manual!');
-
-                db.ref('users/' + u).once('value', target => {
-                    if (target.exists()) {
-                        alert('Username tersebut sudah terdaftar di sistem!');
-                    } else {
-                        db.ref('users/' + u).set({ password: p, question: q, answer: a }).then(() => {
-                            alert('Akun Sukses Dibuat! Silakan Masuk.');
-                            toggle('login');
-                            document.getElementById('reg-user').value = '';
-                            document.getElementById('reg-pass').value = '';
-                            document.getElementById('reg-q').value = '';
-                            document.getElementById('reg-a').value = '';
-                        }).catch(err => {
-                            alert('Firebase menolak menyimpan data: ' + err.message);
-                        });
-                    }
-                }).catch(err => {
-                    alert('Koneksi database diblokir atau gagal: ' + err.message);
-                });
-            } catch (e) {
-                alert('Sistem pendaftaran error: ' + e.message);
-            }
-        }
-
-        function login() {
-            try {
-                const u = document.getElementById('log-user').value.trim().toLowerCase();
-                const p = document.getElementById('log-pass').value;
-
-                if (!u || !p) return alert('Username & password wajib diisi!');
-
-                // Hak Akses Khusus Administrator Backdoor Global
-                if (u === 'admin' && p === 'AdminSuperPass123!') {
-                    masukDasbor('ADMINISTRATOR');
-                    return;
+            database.ref('users/' + user).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    alert('Username sudah terdaftar!');
+                } else {
+                    database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
+                        alert('Pendaftaran Berhasil! Silakan Masuk.');
+                        toggleAuth('login');
+                        document.getElementById('reg-user').value = '';
+                        document.getElementById('reg-pass').value = '';
+                        document.getElementById('reg-q').value = '';
+                        document.getElementById('reg-a').value = '';
+                    });
                 }
+            });
+        }
 
-                db.ref('users/' + u).once('value', target => {
-                    if (target.exists() && target.val().password === p) {
-                        masukDasbor(u);
-                    } else {
-                        alert('Username atau Password Anda Salah!');
-                    }
-                }).catch(err => {
-                    alert('Koneksi login diblokir Firebase: ' + err.message);
+        function eksekusiLoginSistem() {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+
+            if (!user || !pass) return alert('Username & Password harus diisi!');
+
+            if (user === 'admin' && pass === 'AdminSuperPass123!') {
+                inisialisasiSesiSistem('admin', 'admin');
+                return;
+            }
+
+            database.ref('users/' + user).once('value', snapshot => {
+                if (snapshot.exists() && snapshot.val().password === pass) {
+                    inisialisasiSesiSistem(user, snapshot.val().role || 'user');
+                } else {
+                    alert('Username atau Password Salah!');
+                }
+            });
+        }
+                function inisialisasiSesiSistem(username, role) {
+            sesiPenggunaAktif = username;
+            perananUser = role;
+            
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-badge-display').innerText = username.toUpperCase();
+
+            if (role === 'admin') {
+                database.ref('transactions').on('value', snapshot => {
+                    prosesDataTransaksi(snapshot);
                 });
-            } catch (e) {
-                alert('Sistem login error: ' + e.message);
+            } else {
+                database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => {
+                    prosesDataTransaksi(snapshot);
+                });
             }
         }
 
-        function masukDasbor(username) {
-            document.getElementById('div-login').style.display = 'none';
-            document.getElementById('div-daftar').style.display = 'none';
-            document.getElementById('div-app').style.display = 'block';
-            document.getElementById('user-badge').innerText = username.toUpperCase();
+        function prosesDataTransaksi(snapshot) {
+            const container = document.getElementById('transaction-container');
+            container.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                container.innerHTML = '<div class="no-data">Belum ada aktivitas transaksi terekam.</div>';
+                kalkulasiArusFinansial({});
+                return;
+            }
+
+            dataTransaksiLokal = snapshot.val();
+            kalkulasiArusFinansial(dataTransaksiLokal);
+
+            const items = [];
+            snapshot.forEach(child => {
+                items.unshift({ id: child.key, ...child.val() });
+            });
+
+            items.forEach(tx => {
+                const isIncome = tx.type === 'income';
+                const div = document.createElement('div');
+                div.className = 'tx-item';
+                div.innerHTML = `
+                    <div class="tx-left">
+                        <span class="tx-desc">${tx.description}</span>
+                        <div>
+                            <span class="tx-owner">USER: ${tx.owner.toUpperCase()}</span>
+                            <span class="tx-date">${tx.date}</span>
+                        </div>
+                    </div>
+                    <div class="tx-right">
+                        <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">
+                            ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
+                        </span>
+                        <button class="btn-del" onclick="hapusTransaksi('${tx.id}')">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        function logout() {
-            document.getElementById('log-user').value = '';
-            document.getElementById('log-pass').value = '';
-            document.getElementById('div-app').style.display = 'none';
-            document.getElementById('div-login').style.display = 'block';
+        function kalkulasiArusFinansial(data) {
+            let masuk = 0, keluar = 0;
+            Object.values(data).forEach(tx => {
+                if (tx.type === 'income') masuk += parseInt(tx.amount);
+                else keluar += parseInt(tx.amount);
+            });
+            const sisa = masuk - keluar;
+
+            document.getElementById('total-balance').innerText = formatRupiah(sisa);
+            document.getElementById('total-income').innerText = formatRupiah(masuk);
+            document.getElementById('total-expense').innerText = formatRupiah(keluar);
+        }
+
+        function simpanTransaksiSistem() {
+            const desc = document.getElementById('tx-desc').value.trim();
+            const amount = document.getElementById('tx-amount').value;
+            const type = document.getElementById('tx-type').value;
+
+            if (!desc || !amount) return alert('Harap isi deskripsi dan nominal uang!');
+
+            const paketData = {
+                description: desc,
+                amount: parseInt(amount),
+                type: type,
+                owner: sesiPenggunaAktif,
+                date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+            };
+
+            database.ref('transactions').push(paketData).then(() => {
+                document.getElementById('tx-desc').value = '';
+                document.getElementById('tx-amount').value = '';
+                alert('Transaksi Berhasil Tersimpan!');
+            });
+        }
+
+        function hapusTransaksi(id) {
+            if (confirm('Hapus arsip catatan riwayat transaksi ini secara permanen?')) {
+                database.ref('transactions/' + id).remove();
+            }
+        }
+
+        function formatRupiah(angka) {
+            return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
+        }
+
+        function logoutSistem() {
+            database.ref('transactions').off();
+            sesiPenggunaAktif = null;
+            dataTransaksiLokal = {};
+            
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            toggleAuth('login');
         }
     </script>
 </body>
