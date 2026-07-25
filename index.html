@@ -45,6 +45,7 @@
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
         .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
+        
         .header-right { display: flex; align-items: center; gap: 12px; }
         .btn-logout {
             background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
@@ -53,6 +54,7 @@
         }
         .app-container { padding: 0 20px; }
         #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
+        
         .balance-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
@@ -70,11 +72,13 @@
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+        
         input, select {
             width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
         }
         input:focus, select:focus { border-color: var(--primary); }
+        
         .btn-submit {
             width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
             color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
@@ -94,6 +98,7 @@
         .tx-amount { font-size: 15px; font-weight: 700; }
         .amt-inc { color: var(--success); }
         .amt-exp { color: var(--danger); }
+        
         .action-btns { display: flex; gap: 8px; }
         .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
         .btn-edit { color: var(--primary); }
@@ -102,6 +107,7 @@
     </style>
 </head>
 <body>
+    <!-- GERBANG UTAMA SISTEM AUTENTIKASI -->
     <div id="auth-screen">
         <!-- FORM LOGIN -->
         <div id="login-box" class="auth-box">
@@ -121,7 +127,7 @@
             </div>
         </div>
 
-        <!-- FORM DAFTAR BARU (FIXED & FULL) -->
+        <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
@@ -166,8 +172,7 @@
             </div>
         </div>
     </div>
-
-    <!-- DASHBOARD INDEKS UTAMA -->
+        <!-- DASHBOARD INDEKS UTAMA -->
     <div id="main-app">
         <header class="header">
             <div class="logo">Nurlela<span>Finance</span></div>
@@ -178,12 +183,14 @@
         </header>
 
         <main class="app-container">
+            <!-- PANEL MONITORING ADMIN -->
             <section id="admin-panel">
                 <div class="section-title" style="color: var(--admin-color);">Panel Utama Eksekutif Admin</div>
                 <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 15px;">Memonitor seluruh aktivitas transaksi pengguna secara real-time.</div>
                 <div id="admin-user-list" class="tx-list"></div>
             </section>
 
+            <!-- KARTU SALDO UTAMA -->
             <section class="balance-card">
                 <div class="bal-label">Total Saldo Dompet</div>
                 <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -205,6 +212,7 @@
                 </div>
             </section>
 
+            <!-- FORM TRANSAKSI BARU -->
             <section class="form-section">
                 <div id="form-title" class="section-title">Catat Transaksi Finansial</div>
                 <input type="hidden" id="tx-edit-id">
@@ -227,6 +235,7 @@
                 <button id="btn-cancel-edit" class="btn-submit" style="background: #475569; margin-top: 10px; display: none;" onclick="resetFormTransaksi()">Batalkan Perubahan</button>
             </section>
 
+            <!-- RIWAYAT TRANSAKSI -->
             <section class="history-section">
                 <div class="section-title">Riwayat Arus Kas Real-time</div>
                 <div id="transaction-container" class="tx-list">
@@ -235,12 +244,12 @@
             </section>
         </main>
     </div>
-        <!-- PUSTAKA INTI FIREBASE REALTIME DATABASE -->
+        <!-- KONEKSI SDK FIREBASE CORE DAN DATABASE -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
 
     <script>
-        // KONFIGURASI SERVER SINGAPORE ANDA
+        // KONFIGURASI KREDENSIAL TARGET SERVER SINGAPORE
         const firebaseConfig = {
             apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
             authDomain: "://firebaseapp.com",
@@ -252,14 +261,14 @@
             measurementId: "G-5XXYFS9HGT"
         };
         
-        // Inisialisasi Firebase Global
+        // Memulai Layanan Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let sesiPenggunaAktif = null;
         let dataTransaksiLokal = {};
 
-        // Navigasi Pilihan Menu Tampilan Login/Daftar
+        // Pengatur Alur Tampilan Menu Autentikasi
         function beralihMenuAuth(tujuan) {
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('register-box').style.display = 'none';
@@ -275,7 +284,7 @@
             }
         }
 
-        // Fungsi Tulis Data Pendaftaran User Baru
+        // Jalur Eksekusi Registrasi Pengguna Baru
         function eksekusiDaftarSistem() {
             const user = document.getElementById('reg-user').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value;
@@ -302,7 +311,7 @@
             });
         }
 
-        // Fungsi Validasi Masuk Akun
+        // Jalur Eksekusi Verifikasi Login
         function eksekusiLoginSistem() {
             const user = document.getElementById('login-user').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value;
@@ -328,7 +337,7 @@
             });
         }
 
-        // Cek Pertanyaan Pemulihan Password
+        // Validasi Awal Pertanyaan Pemulihan Sandi
         function cekPertanyaanPemulihan() {
             const user = document.getElementById('reset-user').value.trim().toLowerCase();
             if (!user) return alert('Masukkan username pelacakan!');
@@ -344,7 +353,7 @@
             });
         }
 
-        // Eksekusi Update Password Baru setelah Jawaban Benar
+        // Pembaruan Sandi Baru ke Database setelah Jawaban Valid
         function eksekusiResetSandi() {
             const user = document.getElementById('reset-user').value.trim().toLowerCase();
             const answer = document.getElementById('reset-answer').value.trim().toLowerCase();
@@ -365,7 +374,7 @@
                 }
             });
         }
-                // Inisialisasi Layar Dasbor Utama setelah Sukses Login
+                // Inisialisasi Tampilan Dashboard Sesuai Role Akun
         function inisialisasiSesiSistem(username, role) {
             sesiPenggunaAktif = username;
             document.getElementById('auth-screen').style.display = 'none';
@@ -389,7 +398,7 @@
             return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
         }
 
-        // Ambil Data Transaksi Real-time Khusus User Tertentu
+        // Aliran Data Sinkronisasi Riwayat Kas khusus Pengguna Aktif
         function sinkronisasiDataTransaksiUser(username) {
             database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => {
                 const container = document.getElementById('transaction-container');
@@ -446,7 +455,7 @@
             document.getElementById('total-expense').innerText = formatRupiah(totalKeluar);
         }
 
-        // Simpan Transaksi Baru atau Update Transaksi Lama
+        // Eksekusi Simpan atau Perbarui Catatan Kas ke Database
         function simpanTransaksiSistem() {
             const desc = document.getElementById('tx-desc').value.trim();
             const amount = document.getElementById('tx-amount').value;
@@ -474,7 +483,6 @@
             }
         }
 
-        // Ambil Data Transaksi ke Form Input saat Tombol Edit Ditekan
         window.siapkanEditTransaksi = function(id) {
             const tx = dataTransaksiLokal[id];
             if (!tx) return;
@@ -500,14 +508,13 @@
             document.getElementById('btn-cancel-edit').style.display = 'none';
         }
 
-        // Menghapus Data Transaksi Terpilih
         window.hapusTransaksiSistem = function(id) {
             if (confirm('Hapus arsip catatan riwayat transaksi ini secara permanen?')) {
                 database.ref('transactions/' + id).remove();
             }
         }
 
-        // Sinkronisasi Seluruh Aktivitas Pengguna Luar (Khusus Peran Admin)
+        // Monitoring Aliran Data Transaksi Global secara Menyeluruh (Khusus Admin)
         function sinkronisasiDataAdmin() {
             database.ref('transactions').on('value', snapshotAdmin => {
                 const adminList = document.getElementById('admin-user-list');
@@ -548,7 +555,7 @@
             });
         }
 
-        // Keluar Sesi dan Putus Aliran Data Sinkronisasi Database
+        // Fungsi Pemutus Koneksi Aliran Data saat Sesi Berakhir
         function logoutSistem() {
             if (sesiPenggunaAktif) {
                 database.ref('transactions').off();
