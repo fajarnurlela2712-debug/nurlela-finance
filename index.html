@@ -108,7 +108,7 @@
             </div>
         </header>
 
-        <!-- KARTU ARUS SALDO KAS -->
+        <!-- KARTU MONITORED SALDO KAS -->
         <section class="balance-card">
             <div class="bal-label">Total Saldo Dompet</div>
             <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -153,7 +153,7 @@
             </div>
         </section>
     </div>
-        <!-- SEGMEN SDK FIREBASE ENGINE UTAMA (WAJIB DITARUH LEBIH DULU) -->
+        <!-- SDK UTAMA FIREBASE CORE DAN DATABASE (WAJIB COUPLING DI SINI) -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     
@@ -164,6 +164,12 @@
             return true;
         };
 
+        // Deklarasi variabel global agar terbaca oleh semua fungsi
+        var database;
+        let sesiPenggunaAktif = null;
+        let dataTransaksiLokal = {};
+        let perananUser = "user";
+
         try {
             const firebaseConfig = {
                 apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
@@ -173,14 +179,10 @@
             };
             
             firebase.initializeApp(firebaseConfig);
-            var database = firebase.database();
+            database = firebase.database(); // Pengisian objek database aman dari undefined
         } catch (e) {
             alert('Firebase gagal tersambung: ' + e.message);
         }
-
-        let sesiPenggunaAktif = null;
-        let dataTransaksiLokal = {};
-        let perananUser = "user";
 
         function toggleAuth(menu) {
             document.getElementById('login-box').style.display = menu === 'daftar' ? 'none' : 'block';
@@ -235,7 +237,8 @@
                 });
             } catch(e) { alert('Eror fungsi login: ' + e.message); }
         }
-                function inisialisasiSesiSistem(username, role) {
+
+        function inisialisasiSesiSistem(username, role) {
             sesiPenggunaAktif = username;
             perananUser = role;
             
@@ -354,3 +357,5 @@
     </script>
 </body>
 </html>
+
+    
