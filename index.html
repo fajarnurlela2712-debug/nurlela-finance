@@ -3,270 +3,691 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nurlela Finance</title>
+    <title>Nurlela Finance - Firebase Enterprise Wallet</title>
     <style>
-        :root { --bg-main: #060913; --bg-card: #111a2e; --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; --text: #f8fafc; --text-muted: #64748b; }
-        body { margin: 0; background-color: var(--bg-main); color: var(--text); font-family: sans-serif; padding-bottom: 30px; }
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-main); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
-        .auth-box { background-color: var(--bg-card); padding: 30px; border-radius: 24px; width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05); text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-        .auth-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+        :root {
+            --bg-main: #060913;
+            --bg-card: #111a2e;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --text: #f8fafc;
+            --text-muted: #64748b;
+            --admin-color: #a855f7;
+        }
+        body {
+            margin: 0; background-color: var(--bg-main); color: var(--text);
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
+        }
+        
+        /* GERBANG SISTEM AUTENTIKASI - SIMETRIS FIX */
+        #auth-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-main); z-index: 100; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; 
+            padding: 15px; box-sizing: border-box; overflow-y: auto;
+        }
+        .auth-box {
+            background-color: var(--bg-card); padding: 30px; border-radius: 24px;
+            width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6); box-sizing: border-box;
+        }
+        .auth-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 5px; }
         .auth-title span { color: var(--primary); }
-        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
-        .link { color: var(--primary); cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; font-weight: 600; }
-        #main-app { display: none; padding: 20px; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; text-align: center; margin-bottom: 25px; letter-spacing: 0.5px; }
+        .auth-toggle-text { font-size: 13px; text-align: center; margin-top: 20px; color: var(--text-muted); }
+        .auth-link { color: var(--primary); cursor: pointer; font-weight: 600; }
+        
+        /* DASHBOARD INDEKS UTAMA */
+        #main-app { display: none; }
+        .header { 
+            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
         .logo { font-size: 20px; font-weight: 800; }
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
-        .btn-logout { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
-        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px; padding: 25px; margin-top: 20px; }
+        .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
+        
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .btn-logout {
+            background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
+            color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px;
+            font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+
+        .app-container { padding: 0 20px; }
+        
+        /* PANEL MONITORING ADMIN */
+        #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
+            padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
         .bal-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
         .bal-amount { font-size: 32px; font-weight: 700; margin: 8px 0 20px 0; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-val { font-size: 16px; font-weight: 600; }
-        .amt-inc { color: var(--success); } .amt-exp { color: var(--danger); }
-        .form-section, .history-section { margin-top: 30px; }
-        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
-        .input-group { margin-bottom: 15px; text-align: left; }
+        .stat-box { display: flex; align-items: center; gap: 10px; }
+        .stat-icon { width: 8px; height: 8px; border-radius: 50%; }
+        .icon-inc { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        .icon-exp { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
+        .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+        .form-section { margin-top: 30px; }
+        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-        input, select { width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none; }
+        
+        input, select {
+            width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
+        }
         input:focus, select:focus { border-color: var(--primary); }
-        .btn-submit { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; }
+        
+        .btn-submit {
+            width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
+            color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .history-section { margin-top: 35px; }
         .tx-list { display: flex; flex-direction: column; gap: 10px; }
-        .tx-item { background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .tx-left { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-        .tx-desc { font-size: 15px; font-weight: 600; display: block; }
-        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
-        .tx-date { font-size: 12px; color: #94a3b8; margin-left: 8px; }
+        .tx-item {
+            background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .tx-left { display: flex; flex-direction: column; gap: 4px; box-sizing: border-box; }
+        .tx-desc { font-size: 15px; font-weight: 600; }
+        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; width: max-content; }
+        .tx-date { font-size: 12px; color: #94a3b8; }
+        .tx-right { display: flex; align-items: center; gap: 15px; }
         .tx-amount { font-size: 15px; font-weight: 700; }
-        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding-left: 10px; }
+        .amt-inc { color: var(--success); }
+        .amt-exp { color: var(--danger); }
+        
+        .action-btns { display: flex; gap: 8px; }
+        .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
+        .btn-edit { color: var(--primary); }
+        .btn-del { color: var(--danger); }
         .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
     </style>
 </head>
 <body>
+    <!-- GERBANG UTAMA SISTEM AUTENTIKASI -->
     <div id="auth-screen">
         <!-- FORM LOGIN -->
         <div id="login-box" class="auth-box">
             <div class="auth-title">Nurlela<span>Finance</span></div>
             <div class="auth-subtitle">Firebase Real-time Wallet</div>
-            <input type="text" id="login-user" placeholder="Username Anda" style="margin-bottom: 12px;" autocomplete="off">
-            <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
-            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
-            <div style="margin-top: 20px;">
-                <span class="link" onclick="toggleAuth('daftar')">Belum punya dompet? Daftar Akun Baru</span>
+            
+            <div class="input-group">
+                <input type="text" id="login-user" placeholder="Username Anda" autocomplete="off">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
+            </div>
+            
+            <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
+            
+            <div class="auth-toggle-text">
+                Belum punya dompet? <span class="auth-link" onclick="beralihMenuAuth('daftar')">Daftar Akun Baru</span>
+                <br><br>
+                <span class="auth-link" style="color: var(--danger); font-size: 12px;" onclick="beralihMenuAuth('reset')">Lupa Kata Sandi?</span>
             </div>
         </div>
+
         <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
-            <input type="text" id="reg-user" placeholder="Buat Username Unik" style="margin-bottom: 12px;" autocomplete="off">
-            <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat" style="margin-bottom: 12px;">
-            <input type="text" id="reg-q" placeholder="Pertanyaan Pemulihan" style="margin-bottom: 12px;">
-            <input type="text" id="reg-a" placeholder="Jawaban Kunci Rahasia">
-            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Daftar & Buat Dompet</button>
-            <div style="margin-top: 20px;">
-                <span class="link" onclick="toggleAuth('login')">Sudah memiliki akun? Masuk ke Sesi</span>
+            
+            <div class="input-group">
+                <input type="text" id="reg-user" placeholder="Buat Username Unik" autocomplete="off">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="text" id="reg-question" placeholder="Pertanyaan Pemulihan (Contoh: Nama Ibu?)">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="text" id="reg-answer" placeholder="Jawaban Kunci Rahasia Anda">
+            </div>
+            
+            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
+            
+            <div class="auth-toggle-text">
+                Sudah memiliki akses? <span class="auth-link" onclick="beralihMenuAuth('login')">Masuk Di Sini</span>
+            </div>
+        </div>
+
+        <!-- FORM RESET PASSWORD -->
+        <div id="reset-box" class="auth-box" style="display: none;">
+            <div class="auth-title">Reset<span>Access</span></div>
+            <div class="auth-subtitle">Verifikasi Jawaban Kunci Cadangan</div>
+            
+            <div class="input-group">
+                <input type="text" id="reset-user" placeholder="Masukkan Username Anda" autocomplete="off">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="text" id="reset-question-prompt" placeholder="Pertanyaan Pemulihan" disabled style="background: rgba(255,255,255,0.02); color: #94a3b8;">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="text" id="reset-answer" placeholder="Masukkan Jawaban Kunci">
+            </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="password" id="reset-new-pass" placeholder="Buat Kata Sandi Baru">
+            </div>
+            
+            <button id="btn-check-user" class="btn-submit" style="margin-top: 20px; background: #475569;" onclick="verifikasiUsernameReset()">Cari Username</button>
+            <button id="btn-final-reset" class="btn-submit" style="margin-top: 10px; display: none;" onclick="eksekusiResetPassword()">Perbarui Kata Sandi</button>
+            
+            <div class="auth-toggle-text">
+                Batal menyetel ulang? <span class="auth-link" onclick="beralihMenuAuth('login')">Kembali Login</span>
             </div>
         </div>
     </div>
-    <!-- DASHBOARD UTAMA -->
+
+    <!-- INDEKS UTAMA DASHBOARD -->
     <div id="main-app">
-        <header class="header">
-            <div class="logo">Nurlela<span>Finance</span></div>
-            <div>
-                <span id="user-badge-display" class="user-badge">USER</span>
-                <button class="btn-logout" style="margin-left: 10px;" onclick="logoutSistem()">Keluar Sesi</button>
+        <div class="header">
+            <div class="logo">Nurlela<span>Finance</span> <span id="current-user-badge" class="user-badge">User</span></div>
+            <div class="header-right">
+                <button class="btn-logout" onclick="eksekusiLogoutSistem()">Keluar</button>
             </div>
-        </header>
-        <section class="balance-card">
-            <div class="bal-label">Total Saldo Dompet</div>
-            <div id="total-balance" class="bal-amount">Rp 0</div>
-            <div class="stats-grid">
-                <div>
-                    <div class="bal-label" style="font-size: 11px;">Pemasukan</div>
-                    <div id="total-income" class="stat-val amt-inc">Rp 0</div>
+        </div>
+        
+        <div class="app-container">
+            <!-- PANEL PENGAWASAN RAHASIA SUPER ADMIN -->
+            <div id="admin-panel">
+                <div class="section-title" style="color: var(--admin-color); display: flex; align-items: center; gap: 8px;">
+                    🛡️ Pengawasan Manajemen Data Global (Mode Admin)
                 </div>
-                <div>
-                    <div class="bal-label" style="font-size: 11px;">Pengeluaran</div>
-                    <div id="total-expense" class="stat-val amt-exp">Rp 0</div>
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">
+                    Sebagai Super Admin, Anda memiliki hak penuh untuk memonitor, mengubah (Update), atau menghapus (Delete) seluruh data transaksi pengguna publik secara cloud.
+                </div>
+                <div id="admin-global-log" class="tx-list"></div>
+
+                <!-- DAFTAR PENGGUNA TERDAFTAR -->
+                <div class="section-title" style="color: var(--admin-color); margin-top: 25px; display: flex; align-items: center; gap: 8px;">
+                    👥 Manajemen Akun & Atur Ulang Sandi Pengguna
+                </div>
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">
+                    Berikut adalah daftar pengguna publik yang terdaftar di cloud Google. Admin berhak menghapus akun atau merestart kata sandi secara paksa.
+                </div>
+                <div id="admin-user-list" class="tx-list"></div>
+            </div>
+
+            <!-- RINGKASAN SALDO -->
+            <div class="balance-card">
+                <div class="bal-label">Total Saldo Bersih Pribadi</div>
+                <div class="bal-amount" id="total-balance">Rp 0</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-icon icon-inc"></div>
+                        <div>
+                            <div class="bal-label" style="font-size: 11px;">Pemasukan</div>
+                            <div class="stat-val" id="total-income" style="color: var(--success);">Rp 0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon icon-exp"></div>
+                        <div>
+                            <div class="bal-label" style="font-size: 11px;">Pengeluaran</div>
+                            <div class="stat-val" id="total-expense" style="color: var(--danger);">Rp 0</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
-        <section class="form-section">
-            <div class="section-title">Catat Transaksi Finansial</div>
-            <div class="input-group">
-                <label>Deskripsi Keperluan</label>
-                <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan" autocomplete="off">
+
+            <!-- FORM CATAT TRANSAKSI -->
+            <div class="form-section">
+                <div id="form-action-title" class="section-title">Catat Transaksi Baru</div>
+                <input type="hidden" id="edit-target-id" value="">
+                
+                <div class="input-group">
+                    <label for="tx-type">Jenis Aliran Dana</label>
+                    <select id="tx-type">
+                        <option value="pemasukan">Pemasukan (+)</option>
+                        <option value="pengeluaran">Pengeluaran (-)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="tx-desc">Deskripsi / Keterangan</label>
+                    <input type="text" id="tx-desc" placeholder="Contoh: Gaji, Jajan Kuliner" maxlength="40">
+                </div>
+                <div class="input-group">
+                    <label for="tx-amount">Nominal Uang (Rp)</label>
+                    <input type="number" id="tx-amount" placeholder="0" inputmode="numeric">
+                </div>
+                
+                <button id="btn-main-action" class="btn-submit" onclick="eksekusiSimpanTransaksi()">Amankan Transaksi</button>
             </div>
-            <div class="input-group">
-                <label>Nominal Finansial (Rupiah)</label>
-                <input type="number" id="tx-amount" placeholder="Contoh: 50000">
+
+            <div class="history-section">
+                <div id="history-title" class="section-title">Log Transaksi Terenkripsi Pribadi</div>
+                <div id="transaction-log" class="tx-list"></div>
             </div>
-            <div class="input-group">
-                <label>Jenis Transaksi Dompet</label>
-                <select id="tx-type">
-                    <option value="income">Pemasukan (Income)</option>
-                    <option value="expense">Pengeluaran (Expense)</option>
-                </select>
-            </div>
-            <button class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
-        </section>
-        <section class="history-section">
-            <div class="section-title">Riwayat Arus Kas Real-time</div>
-            <div id="transaction-container" class="tx-list">
-                <div class="no-data">Belum ada aktivitas transaksi terekam.</div>
-            </div>
-        </section>
+        </div>
     </div>
-        <!-- PEMANGGILAN DATABASE STABIL CDN (MEMPERBAIKI ERROR NOT DEFINED) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    <script>
-        var db;
-        let sesiPenggunaAktif = null;
-        let dataTransaksiLokal = {};
 
-        try {
-            const firebaseConfig = {
-                apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
-                authDomain: "://firebaseapp.com",
-                databaseURL: "https://firebasedatabase.app",
-                projectId: "nurlela-finance"
-            };
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch (e) {
-            console.log('Firebase init error: ' + e.message);
+    <!-- IMPORT MODUL SDK FIREBASE CLOUD DARI CDN GOOGLE OFFICIAL -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
+        const firebaseConfig = {
+    apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
+    authDomain: "nurlela-finance.firebaseapp.com", // -> Sudah diperbaiki secara akurat
+    databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app", // -> Sudah benar!
+    projectId: "nurlela-finance",
+    storageBucket: "nurlela-finance.firebasestorage.app",
+    messagingSenderId: "829026126295",
+    appId: "1:829026126295:web:f0a9502df693164e10392",
+    measurementId: "G-5XXYFS9HGT"
+};
+
+        // Mengaktifkan koneksi server cloud Google Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let userAktif = null;
+        let dataTransaksiGlobal = [];
+        let daftarPengguna = [];
+        let userTargetReset = null;
+        
+        let jumlahPercobaanGagal = 0;
+        let waktuKunciSampai = 0;
+        let timerSesiOtomatis = null;
+        const WAKTU_KEDALUWARSA_SESI = 5 * 60 * 1000; 
+
+        function saringInputJahat(teks) {
+            let div = document.createElement('div');
+            div.innerText = teks;
+            return div.innerHTML;
         }
 
-        function toggleAuth(menu) {
-            document.getElementById('login-box').style.display = menu === 'daftar' ? 'none' : 'block';
-            document.getElementById('register-box').style.display = menu === 'daftar' ? 'block' : 'none';
+        window.beralihMenuAuth = function(menu) {
+            document.getElementById("login-box").style.display = menu === 'login' ? 'block' : 'none';
+            document.getElementById("register-box").style.display = menu === 'daftar' ? 'block' : 'none';
+            document.getElementById("reset-box").style.display = menu === 'reset' ? 'block' : 'none';
+            
+            if (menu === 'reset') {
+                document.getElementById("reset-user").disabled = false;
+                document.getElementById("reset-question-prompt").value = "";
+                document.getElementById("btn-check-user").style.display = "block";
+                document.getElementById("btn-final-reset").style.display = "none";
+            }
+        };
+
+        function segarkanAktivitasSesi() {
+            if (userAktif) {
+                clearTimeout(timerSesiOtomatis);
+                timerSesiOtomatis = setTimeout(() => {
+                    alert("Keamanan Sistem: Sesi kedaluwarsa karena tidak ada aktivitas. Mengunci kembali...");
+                    eksekusiLogoutSistem();
+                }, WAKTU_KEDALUWARSA_SESI);
+            }
         }
 
-        function eksekusiDaftarSistem() {
-            const u = document.getElementById('reg-user').value.trim().toLowerCase();
-            const p = document.getElementById('reg-pass').value;
-            const q = document.getElementById('reg-q').value.trim();
-            const a = document.getElementById('reg-a').value.trim().toLowerCase();
+        window.addEventListener('touchstart', segarkanAktivitasSesi);
+        window.addEventListener('click', segarkanAktivitasSesi);
+        window.addEventListener('scroll', segarkanAktivitasSesi);
+        // --- SUBSISTEM REGISTER, LOGIN & RESET AKUN FIREBASE ---
+        window.eksekusiDaftarSistem = async function() {
+            let user = saringInputJahat(document.getElementById("reg-user").value.trim().toLowerCase());
+            let pass = document.getElementById("reg-pass").value;
+            let ques = saringInputJahat(document.getElementById("reg-question").value.trim());
+            let ans = saringInputJahat(document.getElementById("reg-answer").value.trim().toLowerCase());
 
-            if (!u || !p || !q || !a) return alert('Mohon isi semua data formulir!');
-            if (u === 'admin') return alert('Username "admin" dilindungi!');
+            if (user === "" || pass.length < 4 || ques === "" || ans === "") {
+                alert("Harap isi seluruh kolom! Password minimal 4 karakter.");
+                return;
+            }
+            if (user === "admin") {
+                alert("Akses Ditolak: Username 'admin' dilindungi oleh sistem!");
+                return;
+            }
 
-            db.ref('users/' + u).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    alert('Username sudah terdaftar!');
+            try {
+                let userRef = doc(db, "pengguna", user);
+                let snap = await getDoc(userRef);
+                if (snap.exists()) {
+                    alert("Username tersebut sudah terpakai!");
+                    return;
+                }
+
+                await setDoc(userRef, { username: user, password: pass, pertanyaan: ques, jawaban: ans, role: "user" });
+                alert("Pendaftaran Berhasil! Silakan masuk ke dalam sistem.");
+                document.getElementById("reg-user").value = "";
+                document.getElementById("reg-pass").value = "";
+                document.getElementById("reg-question").value = "";
+                document.getElementById("reg-answer").value = "";
+                beralihMenuAuth('login');
+            } catch (e) { alert("Error Server Google: " + e.message); }
+        };
+
+        window.eksekusiLoginSistem = async function() {
+            if (Date.now() < waktuKunciSampai) {
+                let sisaWaktu = Math.ceil((waktuKunciSampai - Date.now()) / 1000);
+                alert(`Sistem Dibekukan! Silakan tunggu ${sisaWaktu} detik lagi.`);
+                return;
+            }
+
+            let user = document.getElementById("login-user").value.trim().toLowerCase();
+            let pass = document.getElementById("login-pass").value;
+
+            if (user === "" || pass === "") {
+                alert("Username dan Password wajib diisi!");
+                return;
+            }
+ 
+            try {
+                // SUNTIKAN INTEGRITAS: Memastikan Akun admin default otomatis aktif di Cloud Jakarta
+                if (user === "admin") {
+                    let adminRef = doc(db, "pengguna", "admin");
+                    let checkAdmin = await getDoc(adminRef);
+                    if (!checkAdmin.exists() || checkAdmin.data().password !== "admin123" || checkAdmin.data().role !== "admin") {
+                        await setDoc(adminRef, { username: "admin", password: "admin123", pertanyaan: "Sandi Utama?", jawaban: "enterprise", role: "admin" });
+                    }
+                }
+ 
+                let userRef = doc(db, "pengguna", user);
+                let snap = await getDoc(userRef);
+ 
+                if (snap.exists() && snap.data().password === pass) {
+                    jumlahPercobaanGagal = 0;
+                    userAktif = snap.data();
+                    
+                    document.getElementById("login-user").value = "";
+                    document.getElementById("login-pass").value = "";
+                    
+                    let badge = document.getElementById("current-user-badge");
+                    if (userAktif.role === "admin") {
+                        badge.innerText = "Super Admin";
+                        badge.classList.add("admin-badge");
+                        document.getElementById("admin-panel").style.display = "block";
+                    } else {
+                        badge.innerText = `@${userAktif.username}`;
+                        badge.classList.remove("admin-badge");
+                        document.getElementById("admin-panel").style.display = "none";
+                    }
+ 
+                    document.getElementById("auth-screen").style.display = "none";
+                    document.getElementById("main-app").style.display = "block";
+                    
+                    segarkanAktivitasSesi();
+                    aktifkanRealtimeListenerFinansial();
                 } else {
-                    db.ref('users/' + u).set({ password: p, question: q, answer: a, role: 'user' }).then(() => {
-                        alert('Akun Sukses Dibuat! Silakan Masuk.');
-                        toggleAuth('login');
+                    jumlahPercobaanGagal++;
+                    if (jumlahPercobaanGagal >= 3) {
+                        waktuKunciSampai = Date.now() + 30000;
+                        alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
+                    } else { alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`); }
+                }
+            } catch (e) { alert("Gagal terhubung ke Cloud: " + e.message); }
+        };
+        // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
+        function aktifkanRealtimeListenerFinansial() {
+            // Live Stream 1: Memantau seluruh transaksi keuangan dari server Google Jakarta secara real-time
+            onSnapshot(collection(db, "transaksi"), (snapshot) => {
+                dataTransaksiGlobal = [];
+                snapshot.forEach((doc) => {
+                    dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
+                });
+                dataTransaksiGlobal.sort((a, b) => b.id - a.id); // Urutkan dari data paling baru
+                sinkronisasiVisualTampilan();
+            });
+ 
+            // Live Stream 2: Memantau seluruh akun pengguna terdaftar (Khusus Hak Akses Super Admin)
+            if (userAktif.role === "admin") {
+                onSnapshot(collection(db, "pengguna"), (snapshot) => {
+                    daftarPengguna = [];
+                    snapshot.forEach((doc) => {
+                        daftarPengguna.push(doc.data());
+                    });
+                    sinkronisasiVisualTampilan();
+                });
+            }
+        }
+ 
+        window.eksekusiSimpanTransaksi = async function() {
+            let targetId = document.getElementById("edit-target-id").value;
+            let jenis = document.getElementById("tx-type").value;
+            let desc = saringInputJahat(document.getElementById("tx-desc").value.trim());
+            let nominal = parseFloat(document.getElementById("tx-amount").value);
+ 
+            if (desc === "" || isNaN(nominal) || nominal <= 0) {
+                alert("Mohon isi deskripsi dan nominal angka dengan benar.");
+                return;
+            }
+ 
+            let idTransaksi = targetId === "" ? String(Date.now()) : targetId;
+ 
+            try {
+                await setDoc(doc(db, "transaksi", idTransaksi), {
+                    pemilik: targetId === "" ? userAktif.username : dataTransaksiGlobal.find(t => t.id === targetId).pemilik,
+                    jenis: jenis,
+                    deskripsi: desc,
+                    nominal: nominal,
+                    tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                }, { merge: true });
+ 
+                resetFormulirInput();
+            } catch (e) { alert("Gagal menyimpan ke Cloud: " + e.message); }
+        };
+        window.triggerEditTransaksi = function(id) {
+            let item = dataTransaksiGlobal.find(t => t.id == id);
+            if (item) {
+                if (item.pemilik !== userAktif.username && userAktif.role !== "admin") {
+                    alert("Akses Mengubah Data Ditolak!");
+                    return;
+                }
+                document.getElementById("edit-target-id").value = item.id;
+                document.getElementById("tx-type").value = item.jenis;
+                document.getElementById("tx-desc").value = item.deskripsi;
+                document.getElementById("tx-amount").value = item.nominal;
+                document.getElementById("form-action-title").innerText = `Ubah Data Transaksi (${item.pemilik})`;
+                document.getElementById("btn-main-action").innerText = "Perbarui Catatan";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+ 
+        window.eksekusiHapusTransaksi = async function(id) {
+            let item = dataTransaksiGlobal.find(t => t.id == id);
+            if (!item) return;
+ 
+            if (item.pemilik !== userAktif.username && userAktif.role !== "admin") {
+                alert("Akses Menghapus Data Ditolak!");
+                return;
+            }
+ 
+            if (confirm(`Apakah Anda yakin menghapus log milik [${item.pemilik}] ini di Cloud Google?`)) {
+                try {
+                    await deleteDoc(doc(db, "transaksi", String(id)));
+                    resetFormulirInput();
+                } catch (e) { alert("Gagal menghapus: " + e.message); }
+            }
+        };
+ 
+        window.hapusPenggunaOlehAdmin = async function(username) {
+            if (username === "admin") {
+                alert("Aksi Ditolak: Tidak bisa menghapus akun Super Admin!");
+                return;
+            }
+ 
+            if (confirm(`Peringatan: Hapus permanen akun user [@${username}] beserta seluruh riwayat transaksinya dari Cloud?`)) {
+                try {
+                    await deleteDoc(doc(db, "pengguna", username));
+                    let userTx = dataTransaksiGlobal.filter(t => t.pemilik === username);
+                    for (let tx of userTx) {
+                        await deleteDoc(doc(db, "transaksi", tx.id));
+                    }
+                    alert(`Akun [@${username}] berhasil dieliminasi.`);
+                } catch (e) { alert("Gagal menghapus user: " + e.message); }
+            }
+        };
+ 
+        window.resetPasswordUserOlehAdmin = async function(username) {
+            let passwordBaru = prompt(`Masukkan Kata Sandi Baru untuk [@${username}]:`);
+            if (passwordBaru === null) return;
+ 
+            if (passwordBaru.trim().length < 4) {
+                alert("Gagal: Kata sandi minimal 4 karakter!");
+                return;
+            }
+ 
+            try {
+                await updateDoc(doc(db, "pengguna", username), { password: passwordBaru.trim() });
+                alert(`Sukses: Kata sandi [@${username}] berhasil di-reset.`);
+            } catch (e) { alert("Gagal merestart sandi: " + e.message); }
+        };
+ 
+        window.verifikasiUsernameReset = async function() {
+            let user = document.getElementById("reset-user").value.trim().toLowerCase();
+            try {
+                let snap = await getDoc(doc(db, "pengguna", user));
+                if (!snap.exists()) {
+                    alert("Username tidak ditemukan!");
+                    return;
+                }
+                userTargetReset = snap.data();
+                document.getElementById("reset-user").disabled = true;
+                document.getElementById("reset-question-prompt").value = userTargetReset.pertanyaan;
+                document.getElementById("btn-check-user").style.display = "none";
+                document.getElementById("btn-final-reset").style.display = "block";
+            } catch (e) { alert("Error: " + e.message); }
+        };
+ 
+        window.eksekusiResetPassword = async function() {
+            let ans = document.getElementById("reset-answer").value.trim().toLowerCase();
+            let newPass = document.getElementById("reset-new-pass").value;
+ 
+            if (ans === "" || newPass.length < 4) {
+                alert("Isian kolom wajib diisi valid!");
+                return;
+            }
+ 
+            if (ans === userTargetReset.jawaban) {
+                try {
+                    await updateDoc(doc(db, "pengguna", userTargetReset.username), { password: newPass });
+                    alert("Password berhasil diperbarui! Silakan login.");
+                    document.getElementById("reset-user").value = "";
+                    document.getElementById("reset-answer").value = "";
+                    document.getElementById("reset-new-pass").value = "";
+                    beralihMenuAuth('login');
+                } catch (e) { alert("Gagal memperbarui: " + e.message); }
+            } else { alert("Jawaban Kunci Pemulihan Salah!"); }
+        };
+        function resetFormulirInput() {
+            document.getElementById("edit-target-id").value = "";
+            document.getElementById("tx-desc").value = "";
+            document.getElementById("tx-amount").value = "";
+            document.getElementById("form-action-title").innerText = "Catat Transaksi Baru";
+            document.getElementById("btn-main-action").innerText = "Amankan Transaksi";
+        }
+ 
+        function sinkronisasiVisualTampilan() {
+            let saldoNetto = 0, masuk = 0, keluar = 0;
+            let htmlPribadi = "";
+            let htmlAdminGlobal = "";
+            let htmlUserList = "";
+ 
+            let dataPribadi = dataTransaksiGlobal.filter(t => t.pemilik === userAktif.username);
+ 
+            if (dataPribadi.length === 0) {
+                htmlPribadi = '<div class="no-data">Belum ada catatan transaksi aman Anda.</div>';
+            } else {
+                dataPribadi.forEach(t => {
+                    let sign = t.jenis === "pemasukan" ? "+" : "-";
+                    let color = t.jenis === "pemasukan" ? "amt-inc" : "amt-exp";
+ 
+                    if (t.jenis === "pemasukan") { masuk += t.nominal; saldoNetto += t.nominal; }
+                    else { keluar += t.nominal; saldoNetto -= t.nominal; }
+ 
+                    htmlPribadi += `
+                        <div class="tx-item">
+                            <div class="tx-left">
+                                <div class="tx-desc">${t.deskripsi}</div>
+                                <div class="tx-date">${t.tanggal}</div>
+                            </div>
+                            <div class="tx-right">
+                                <div class="tx-amount ${color}">${sign} Rp ${t.nominal.toLocaleString('id-ID')}</div>
+                                <div class="action-btns">
+                                    <button class="btn-action btn-edit" onclick="triggerEditTransaksi('${t.id}')">✎</button>
+                                    <button class="btn-action btn-del" onclick="eksekusiHapusTransaksi('${t.id}')">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+ 
+            document.getElementById("total-balance").innerText = (saldoNetto < 0 ? "-" : "") + "Rp " + Math.abs(saldoNetto).toLocaleString('id-ID');
+            document.getElementById("total-income").innerText = "Rp " + masuk.toLocaleString('id-ID');
+            document.getElementById("total-expense").innerText = "Rp " + keluar.toLocaleString('id-ID');
+            document.getElementById("transaction-log").innerHTML = htmlPribadi;
+ 
+            if (userAktif.role === "admin") {
+                if (dataTransaksiGlobal.length === 0) {
+                    htmlAdminGlobal = '<div class="no-data">Belum ada data transaksi di sistem.</div>';
+                } else {
+                    dataTransaksiGlobal.forEach(t => {
+                        let sign = t.jenis === "pemasukan" ? "+" : "-";
+                        let color = t.jenis === "pemasukan" ? "amt-inc" : "amt-exp";
+                        htmlAdminGlobal += `
+                            <div class="tx-item" style="border-left: 3px solid var(--admin-color);">
+                                <div class="tx-left">
+                                    <div class="tx-desc">${t.deskripsi}</div>
+                                    <div style="margin-top:4px;"><span class="tx-owner">User: ${t.pemilik}</span></div>
+                                    <div class="tx-date" style="margin-top:4px;">${t.tanggal}</div>
+                                </div>
+                                <div class="tx-right">
+                                    <div class="tx-amount ${color}">${sign} Rp ${t.nominal.toLocaleString('id-ID')}</div>
+                                    <div class="action-btns">
+                                        <button class="btn-action btn-edit" onclick="triggerEditTransaksi('${t.id}')">✎</button>
+                                        <button class="btn-action btn-del" onclick="eksekusiHapusTransaksi('${t.id}')">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     });
                 }
-            });
-        }
-
-        function eksekusiLoginSistem() {
-            const u = document.getElementById('login-user').value.trim().toLowerCase();
-            const p = document.getElementById('login-pass').value;
-
-            if (!u || !p) return alert('Username & Password harus diisi!');
-
-            if (u === 'admin' && p === 'AdminSuperPass123!') {
-                inisialisasiSesiSistem('admin', 'admin');
-                return;
-            }
-
-            db.ref('users/' + u).once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val().password === p) {
-                    inisialisasiSesiSistem(u, snapshot.val().role || 'user');
+                document.getElementById("admin-global-log").innerHTML = htmlAdminGlobal;
+ 
+                let userPublik = daftarPengguna.filter(u => u.username !== "admin");
+                if (userPublik.length === 0) {
+                    htmlUserList = '<div class="no-data">Belum ada pengguna publik terdaftar.</div>';
                 } else {
-                    alert('Username atau Password Salah!');
+                    userPublik.forEach(u => {
+                        htmlUserList += `
+                            <div class="tx-item" style="border: 1px solid rgba(168, 85, 247, 0.2); display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+                                <div class="tx-left" style="width: 100%;">
+                                    <div class="tx-desc" style="color: var(--primary); font-size: 16px;">@${u.username}</div>
+                                    <div class="tx-date" style="margin-top:4px; color: var(--text-muted);">Pertanyaan: ${u.pertanyaan}</div>
+                                </div>
+                                <div class="action-btns" style="width: 100%; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                                    <button class="btn-action btn-edit" style="font-size:12px; font-weight:bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="resetPasswordUserOlehAdmin('${u.username}')">Reset PW ⚙️</button>
+                                    <button class="btn-action btn-del" style="font-size:12px; font-weight:bold; background: rgba(244, 63, 94, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="hapusPenggunaOlehAdmin('${u.username}')">Hapus Akun ✕</button>
+                                </div>
+                            </div>
+                        `;
+                    });
                 }
-            });
-        }
-
-        function inisialisasiSesiSistem(username, role) {
-            sesiPenggunaAktif = username;
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-badge-display').innerText = username.toUpperCase();
-
-            if (role === 'admin') {
-                db.ref('transactions').on('value', snapshot => { prosesDataTransaksi(snapshot); });
-            } else {
-                db.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => { prosesDataTransaksi(snapshot); });
+                document.getElementById("admin-user-list").innerHTML = htmlUserList;
             }
         }
-
-        function prosesDataTransaksi(snapshot) {
-            const container = document.getElementById('transaction-container');
-            container.innerHTML = '';
-            if (!snapshot.exists()) {
-                container.innerHTML = '<div class="no-data">Belum ada aktivitas transaksi.</div>';
-                kalkulasiArusFinansial({});
-                return;
-            }
-            dataTransaksiLokal = snapshot.val();
-            kalkulasiArusFinansial(dataTransaksiLokal);
-            const items = [];
-            snapshot.forEach(child => { items.unshift({ id: child.key, ...child.val() }); });
-            items.forEach(tx => {
-                const isIncome = tx.type === 'income';
-                const div = document.createElement('div');
-                div.className = 'tx-item';
-                div.innerHTML = `
-                    <div class="tx-left">
-                        <span class="tx-desc">${tx.description}</span>
-                        <div><span class="tx-owner">USER: ${tx.owner.toUpperCase()}</span><span class="tx-date">${tx.date}</span></div>
-                    </div>
-                    <div class="tx-right">
-                        <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}</span>
-                        <button class="btn-del" onclick="hapusTransaksi('${tx.id}')">🗑️</button>
-                    </div>`;
-                container.appendChild(div);
-            });
-        }
-
-        function kalkulasiArusFinansial(data) {
-            let masuk = 0, keluar = 0;
-            Object.values(data).forEach(tx => {
-                if (tx.type === 'income') masuk += parseInt(tx.amount);
-                else keluar += parseInt(tx.amount);
-            });
-            document.getElementById('total-balance').innerText = formatRupiah(masuk - keluar);
-            document.getElementById('total-income').innerText = formatRupiah(masuk);
-            document.getElementById('total-expense').innerText = formatRupiah(keluar);
-        }
-
-        function simpanTransaksiSistem() {
-            const desc = document.getElementById('tx-desc').value.trim();
-            const amount = document.getElementById('tx-amount').value;
-            const type = document.getElementById('tx-type').value;
-            if (!desc || !amount) return alert('Isi deskripsi dan nominal!');
-            const paketData = { description: desc, amount: parseInt(amount), type: type, owner: sesiPenggunaAktif, date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) };
-            db.ref('transactions').push(paketData).then(() => {
-                document.getElementById('tx-desc').value = '';
-                document.getElementById('tx-amount').value = '';
-                alert('Transaksi Berhasil Tersimpan!');
-            });
-        }
-
-        function hapusTransaksi(id) {
-            if (confirm('Hapus riwayat transaksi ini?')) { db.ref('transactions/' + id).remove(); }
-        }
-
-        function formatRupiah(angka) { return 'Rp ' + parseInt(angka).toLocaleString('id-ID'); }
-
-        function logoutSistem() {
-            db.ref('transactions').off();
-            sesiPenggunaAktif = null;
-            document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('auth-screen').style.display = 'flex';
-            toggleAuth('login');
-        }
+ 
+        window.eksekusiLogoutSistem = function() {
+            userAktif = null;
+            clearTimeout(timerSesiOtomatis);
+            document.getElementById("main-app").style.display = "none";
+            document.getElementById("auth-screen").style.display = "flex";
+            beralihMenuAuth('login');
+            resetFormulirInput();
+        };
     </script>
 </body>
 </html>
