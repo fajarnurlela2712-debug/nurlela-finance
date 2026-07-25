@@ -71,7 +71,7 @@
 </head>
 <body>
     <div id="auth-screen">
-        <!-- FORM LOGIN -->
+        <!-- FORM LOGIN UTAMA -->
         <div id="login-box" class="auth-box">
             <div class="auth-title">Nurlela<span>Finance</span></div>
             <div class="auth-subtitle">Firebase Real-time Wallet</div>
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <!-- FORM DAFTAR BARU (SINKRON ID 100%) -->
+        <!-- FORM PENDAFTARAN AKUN BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
@@ -98,7 +98,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD UTAMA APLIKASI -->
+    <!-- DASHBOARD UTAMA APLIKASI KEUANGAN -->
     <div id="main-app">
         <header class="header">
             <div class="logo">Nurlela<span>Finance</span></div>
@@ -108,7 +108,7 @@
             </div>
         </header>
 
-        <!-- KARTU SALDO UTAMA -->
+        <!-- KARTU ARUS SALDO KAS -->
         <section class="balance-card">
             <div class="bal-label">Total Saldo Dompet</div>
             <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -128,7 +128,7 @@
         <section class="form-section">
             <div class="section-title">Catat Transaksi Finansial</div>
             <div class="input-group">
-                <label>Deskripsi Keperluan</label>
+                <label>Deskripsi Keperluan / Acara</label>
                 <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan, Gaji Pokok" autocomplete="off">
             </div>
             <div class="input-group">
@@ -145,7 +145,7 @@
             <button class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
         </section>
 
-        <!-- RIWAYAT ARUS KAS -->
+        <!-- ARSIP DAFTAR RIWAYAT ARUS KAS -->
         <section class="history-section">
             <div class="section-title">Riwayat Arus Kas Real-time</div>
             <div id="transaction-container" class="tx-list">
@@ -153,21 +153,30 @@
             </div>
         </section>
     </div>
-        <!-- DATABASE SDK ENGINE CORE -->
+        <!-- SEGMEN SDK FIREBASE ENGINE UTAMA (WAJIB DITARUH LEBIH DULU) -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     
     <script>
-        // KREDENSIAL UTAMA SERVER REAL-TIME DATABASE SINGAPORE ANDA
-        const firebaseConfig = {
-            apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebasedatabase.app",
-            projectId: "nurlela-finance"
+        // Fitur pelacak kendala otomatis langsung ke layar HP Anda
+        window.onerror = function(msg, url, linenumber) {
+            alert('Laporan Masalah Sistem: ' + msg + '\nBaris: ' + linenumber);
+            return true;
         };
-        
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
+                authDomain: "://firebaseapp.com",
+                databaseURL: "https://firebasedatabase.app",
+                projectId: "nurlela-finance"
+            };
+            
+            firebase.initializeApp(firebaseConfig);
+            var database = firebase.database();
+        } catch (e) {
+            alert('Firebase gagal tersambung: ' + e.message);
+        }
 
         let sesiPenggunaAktif = null;
         let dataTransaksiLokal = {};
@@ -179,48 +188,52 @@
         }
 
         function eksekusiDaftarSistem() {
-            const user = document.getElementById('reg-user').value.trim().toLowerCase();
-            const pass = document.getElementById('reg-pass').value;
-            const q = document.getElementById('reg-q').value.trim();
-            const a = document.getElementById('reg-a').value.trim().toLowerCase();
+            try {
+                const user = document.getElementById('reg-user').value.trim().toLowerCase();
+                const pass = document.getElementById('reg-pass').value;
+                const q = document.getElementById('reg-q').value.trim();
+                const a = document.getElementById('reg-a').value.trim().toLowerCase();
 
-            if (!user || !pass || !q || !a) return alert('Lengkapi semua bidang pendaftaran!');
-            if (user === 'admin') return alert('Username "admin" dilindungi otoritas!');
+                if (!user || !pass || !q || !a) return alert('Mohon isi semua data formulir!');
+                if (user === 'admin') return alert('Username "admin" dilindungi otoritas!');
 
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    alert('Username sudah terdaftar!');
-                } else {
-                    database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
-                        alert('Pendaftaran Berhasil! Silakan Masuk.');
-                        toggleAuth('login');
-                        document.getElementById('reg-user').value = '';
-                        document.getElementById('reg-pass').value = '';
-                        document.getElementById('reg-q').value = '';
-                        document.getElementById('reg-a').value = '';
-                    });
-                }
-            });
+                database.ref('users/' + user).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        alert('Username tersebut sudah digunakan orang lain!');
+                    } else {
+                        database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
+                            alert('Akun Dompet Sukses Dibuat! Silakan Masuk.');
+                            toggleAuth('login');
+                            document.getElementById('reg-user').value = '';
+                            document.getElementById('reg-pass').value = '';
+                            document.getElementById('reg-q').value = '';
+                            document.getElementById('reg-a').value = '';
+                        }).catch(err => alert('Gagal menyimpan data: ' + err.message));
+                    }
+                });
+            } catch(e) { alert('Eror fungsi daftar: ' + e.message); }
         }
 
         function eksekusiLoginSistem() {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
+            try {
+                const user = document.getElementById('login-user').value.trim().toLowerCase();
+                const pass = document.getElementById('login-pass').value;
 
-            if (!user || !pass) return alert('Username & Password harus diisi!');
+                if (!user || !pass) return alert('Username & Password wajib diisi!');
 
-            if (user === 'admin' && pass === 'AdminSuperPass123!') {
-                inisialisasiSesiSistem('admin', 'admin');
-                return;
-            }
-
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val().password === pass) {
-                    inisialisasiSesiSistem(user, snapshot.val().role || 'user');
-                } else {
-                    alert('Username atau Password Salah!');
+                if (user === 'admin' && pass === 'AdminSuperPass123!') {
+                    inisialisasiSesiSistem('admin', 'admin');
+                    return;
                 }
-            });
+
+                database.ref('users/' + user).once('value', snapshot => {
+                    if (snapshot.exists() && snapshot.val().password === pass) {
+                        inisialisasiSesiSistem(user, snapshot.val().role || 'user');
+                    } else {
+                        alert('Username atau Sandi Keamanan Anda Salah!');
+                    }
+                });
+            } catch(e) { alert('Eror fungsi login: ' + e.message); }
         }
                 function inisialisasiSesiSistem(username, role) {
             sesiPenggunaAktif = username;
