@@ -3,370 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nurlela Finance - Firebase Enterprise Wallet</title>
+    <title>Nurlela Finance</title>
     <style>
-        :root {
-            --bg-main: #060913;
-            --bg-card: #111a2e;
-            --primary: #38bdf8;
-            --success: #10b981;
-            --danger: #f43f5e;
-            --text: #f8fafc;
-            --text-muted: #64748b;
-            --admin-color: #a855f7;
-        }
-        body {
-            margin: 0; background-color: var(--bg-main); color: var(--text);
-            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
-        }
-        #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-main); z-index: 100; display: flex;
-            flex-direction: column; justify-content: center; align-items: center; 
-            padding: 15px; box-sizing: border-box; overflow-y: auto;
-        }
-        .auth-box {
-            background-color: var(--bg-card); padding: 30px; border-radius: 24px;
-            width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6); box-sizing: border-box;
-        }
-        .auth-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 5px; }
-        .auth-title span { color: var(--primary); }
-        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; text-align: center; margin-bottom: 25px; letter-spacing: 0.5px; }
-        .auth-toggle-text { font-size: 13px; text-align: center; margin-top: 20px; color: var(--text-muted); }
-        .auth-link { color: var(--primary); cursor: pointer; font-weight: 600; }
-        
-        #main-app { display: none; }
-        .header { 
-            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            display: flex; justify-content: space-between; align-items: center; 
-        }
-        .logo { font-size: 20px; font-weight: 800; }
-        .logo span { color: var(--primary); }
-        .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
-        .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
-        
-        .header-right { display: flex; align-items: center; gap: 12px; }
-        .btn-logout {
-            background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
-            color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px;
-            font-weight: 700; cursor: pointer; transition: all 0.2s;
-        }
-        .app-container { padding: 0 20px; }
-        #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
-        
-        .balance-card {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
-            padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-        .bal-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .bal-amount { font-size: 32px; font-weight: 700; margin: 8px 0 20px 0; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-box { display: flex; align-items: center; gap: 10px; }
-        .stat-icon { width: 8px; height: 8px; border-radius: 50%; }
-        .icon-inc { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
-        .icon-exp { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
-        .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
-        .form-section { margin-top: 30px; }
-        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-        
-        input, select {
-            width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
-        }
-        input:focus, select:focus { border-color: var(--primary); }
-        
-        .btn-submit {
-            width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
-            color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-        }
-        .history-section { margin-top: 35px; }
-        .tx-list { display: flex; flex-direction: column; gap: 10px; }
-        .tx-item {
-            background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .tx-left { display: flex; flex-direction: column; gap: 4px; box-sizing: border-box; }
-        .tx-desc { font-size: 15px; font-weight: 600; }
-        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; width: max-content; }
-        .tx-date { font-size: 12px; color: #94a3b8; }
-        .tx-right { display: flex; align-items: center; gap: 15px; }
-        .tx-amount { font-size: 15px; font-weight: 700; }
-        .amt-inc { color: var(--success); }
-        .amt-exp { color: var(--danger); }
-        
-        .action-btns { display: flex; gap: 8px; }
-        .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
-        .btn-edit { color: var(--primary); }
-        .btn-del { color: var(--danger); }
-        .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
+        body { margin: 0; background-color: #060913; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background-color: #111a2e; padding: 30px; border-radius: 24px; width: 100%; max-width: 320px; box-sizing: border-box; text-align: center; }
+        .title { font-size: 22px; font-weight: 800; margin-bottom: 20px; }
+        input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none; }
+        .btn { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; }
+        .link { color: #38bdf8; cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; }
     </style>
 </head>
 <body>
-    <div id="auth-screen">
-        <!-- FORM LOGIN -->
-        <div id="login-box" class="auth-box">
-            <div class="auth-title">Nurlela<span>Finance</span></div>
-            <div class="auth-subtitle">Firebase Real-time Wallet</div>
-            <div class="input-group">
-                <input type="text" id="login-user" placeholder="Username Anda" autocomplete="off">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
-            </div>
-            <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
-            <div class="auth-toggle-text">
-                Belum punya dompet? <span class="auth-link" onclick="beralihMenuAuth('daftar')">Daftar Akun Baru</span>
-                <br><br>
-                <span class="auth-link" style="color: var(--danger); font-size: 12px;" onclick="beralihMenuAuth('reset')">Lupa Kata Sandi?</span>
-            </div>
-        </div>
-
-        <!-- FORM DAFTAR BARU -->
-        <div id="register-box" class="auth-box" style="display: none;">
-            <div class="auth-title">Create<span>Account</span></div>
-            <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
-            <div class="input-group">
-                <input type="text" id="reg-user" placeholder="Buat Username Unik" autocomplete="off">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reg-question" placeholder="Pertanyaan Pemulihan (Contoh: Nama Ibu?)">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reg-answer" placeholder="Jawaban Kunci Rahasia Anda">
-            </div>
-            <button id="btn-register" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Daftar & Buat Dompet</button>
-            <div class="auth-toggle-text">
-                Sudah memiliki akun? <span class="auth-link" onclick="beralihMenuAuth('masuk')">Masuk ke Sesi</span>
-            </div>
-        </div>
-
-        <!-- FORM LUPA KATA SANDI -->
-        <div id="reset-box" class="auth-box" style="display: none;">
-            <div class="auth-title">Recovery<span>System</span></div>
-            <div class="auth-subtitle">Verifikasi Jawaban Kunci Rahasia</div>
-            <div class="input-group">
-                <input type="text" id="reset-user" placeholder="Masukkan Username Anda" autocomplete="off">
-            </div>
-            <button class="btn-submit" style="margin-top: 15px; background: #475569;" onclick="cekPertanyaanPemulihan()">Cek Pertanyaan Keamanan</button>
-            <div id="security-question-area" style="display: none; margin-top: 15px;">
-                <div class="input-group">
-                    <label id="lbl-question">Pertanyaan Pemulihan</label>
-                    <input type="text" id="reset-answer" placeholder="Jawaban Kunci Anda">
-                </div>
-                <div class="input-group" style="margin-top: 15px;">
-                    <input type="password" id="reset-new-pass" placeholder="Kata Sandi Baru">
-                </div>
-                <button class="btn-submit" style="margin-top: 15px;" onclick="eksekusiResetSandi()">Perbarui Kata Sandi</button>
-            </div>
-            <div class="auth-toggle-text">
-                Kembali ke halaman <span class="auth-link" onclick="beralihMenuAuth('masuk')">Log In</span>
-            </div>
-        </div>
+    <!-- FORM MASUK -->
+    <div id="div-login" class="box">
+        <div class="title">Nurlela Finance</div>
+        <input type="text" id="log-user" placeholder="Username Anda">
+        <input type="password" id="log-pass" placeholder="Kata Sandi">
+        <button class="btn" onclick="login()">Masuk Sesi Aman</button>
+        <span class="link" onclick="toggle('daftar')">Belum punya dompet? Daftar Baru</span>
     </div>
 
-    <!-- DASHBOARD INDEKS UTAMA -->
-    <div id="main-app">
-        <header class="header">
-            <div class="logo">Nurlela<span>Finance</span></div>
-            <div class="header-right">
-                <span id="user-badge-display" class="user-badge">User</span>
-                <button class="btn-logout" onclick="logoutSistem()">Keluar Sesi</button>
-            </div>
-        </header>
-
-        <main class="app-container">
-            <section id="admin-panel">
-                <div class="section-title" style="color: var(--admin-color);">Panel Utama Eksekutif Admin</div>
-                <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 15px;">Memonitor seluruh aktivitas transaksi pengguna secara real-time.</div>
-                <div id="admin-user-list" class="tx-list"></div>
-            </section>
-
-            <section class="balance-card">
-                <div class="bal-label">Total Saldo Dompet</div>
-                <div id="total-balance" class="bal-amount">Rp 0</div>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-icon icon-inc"></div>
-                        <div>
-                            <div class="bal-label" style="font-size: 11px;">Pemasukan</div>
-                            <div id="total-income" class="stat-val amt-inc">Rp 0</div>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-icon icon-exp"></div>
-                        <div>
-                            <div class="bal-label" style="font-size: 11px;">Pengeluaran</div>
-                            <div id="total-expense" class="stat-val amt-exp">Rp 0</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="form-section">
-                <div id="form-title" class="section-title">Catat Transaksi Finansial</div>
-                <input type="hidden" id="tx-edit-id">
-                <div class="input-group">
-                    <label>Deskripsi Acara / Keperluan</label>
-                    <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan, Gaji Pokok" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <label>Nominal Finansial (Rupiah)</label>
-                    <input type="number" id="tx-amount" placeholder="Contoh: 50000">
-                </div>
-                <div class="input-group">
-                    <label>Jenis Transaksi Dompet</label>
-                    <select id="tx-type">
-                        <option value="income">Pemasukan (Income)</option>
-                        <option value="expense">Pengeluaran (Expense)</option>
-                    </select>
-                </div>
-                <button id="btn-save-tx" class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
-                <button id="btn-cancel-edit" class="btn-submit" style="background: #475569; margin-top: 10px; display: none;" onclick="resetFormTransaksi()">Batalkan Perubahan</button>
-            </section>
-
-            <section class="history-section">
-                <div class="section-title">Riwayat Arus Kas Real-time</div>
-                <div id="transaction-container" class="tx-list">
-                    <div class="no-data">Belum ada aktivitas transaksi terekam.</div>
-                </div>
-            </section>
-        </main>
+    <!-- FORM DAFTAR -->
+    <div id="div-daftar" class="box" style="display: none;">
+        <div class="title">Create Account</div>
+        <input type="text" id="reg-user" placeholder="Buat Username Unik">
+        <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat">
+        <input type="text" id="reg-q" placeholder="Pertanyaan Pemulihan">
+        <input type="text" id="reg-a" placeholder="Jawaban Rahasia">
+        <button class="btn" onclick="daftar()">Daftar & Buat Dompet</button>
+        <span class="link" onclick="toggle('login')">Sudah punya akun? Masuk</span>
     </div>
-        <script src="https://gstatic.com"></script>
+
+    <!-- HALAMAN UTAMA DASBOR -->
+    <div id="div-app" class="box" style="display: none;">
+        <div class="title">Selamat Datang!</div>
+        <div id="user-badge" style="font-size: 18px; color: #38bdf8; margin-bottom: 20px;"></div>
+        <button class="btn" style="background: #f43f5e;" onclick="logout()">Keluar Sesi</button>
+    </div>
+
+    <!-- DATABASE CORE ENGINE -->
     <script src="https://gstatic.com"></script>
-
+    <script src="https://gstatic.com"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
             authDomain: "://firebaseapp.com",
             databaseURL: "https://firebasedatabase.app",
-            projectId: "nurlela-finance",
-            storageBucket: "nurlela-finance.firebasestorage.app",
-            messagingSenderId: "829026126295",
-            appId: "1:829026126295:web:f0a9502df693164e10392",
-            measurementId: "G-5XXYFS9HGT"
+            projectId: "nurlela-finance"
         };
-        
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        let sesiPenggunaAktif = null;
-        let dataTransaksiLokal = {};
-
-        function beralihMenuAuth(tujuan) {
-            document.getElementById('login-box').style.display = 'none';
-            document.getElementById('register-box').style.display = 'none';
-            document.getElementById('reset-box').style.display = 'none';
-            document.getElementById('security-question-area').style.display = 'none';
-
-            if (tujuan === 'daftar') {
-                document.getElementById('register-box').style.display = 'block';
-            } else if (tujuan === 'reset') {
-                document.getElementById('reset-box').style.display = 'block';
-            } else {
-                document.getElementById('login-box').style.display = 'block';
-            }
+        function toggle(menu) {
+            document.getElementById('div-login').style.display = menu === 'daftar' ? 'none' : 'block';
+            document.getElementById('div-daftar').style.display = menu === 'daftar' ? 'block' : 'none';
         }
 
-        function eksekusiDaftarSistem() {
-            const user = document.getElementById('reg-user').value.trim().toLowerCase();
-            const pass = document.getElementById('reg-pass').value;
-            const q = document.getElementById('reg-question').value.trim();
-            const a = document.getElementById('reg-answer').value.trim().toLowerCase();
+        function daftar() {
+            const u = document.getElementById('reg-user').value.trim().toLowerCase();
+            const p = document.getElementById('reg-pass').value;
+            const q = document.getElementById('reg-q').value.trim();
+            const a = document.getElementById('reg-a').value.trim().toLowerCase();
 
-            if (!user || !pass || !q || !a) return alert('Mohon isi seluruh bidang pendaftaran!');
-            if (user === 'admin') return alert('Username admin dilindungi oleh sistem!');
+            if (!u || !p || !q || !a) return alert('Isi semua data!');
+            if (u === 'admin') return alert('Username "admin" tidak boleh digunakan!');
 
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    alert('Username tersebut sudah digunakan!');
+            db.ref('users/' + u).once('value', target => {
+                if (target.exists()) {
+                    alert('Username sudah terdaftar!');
                 } else {
-                    database.ref('users/' + user).set({
-                        password: pass,
-                        question: q,
-                        answer: a,
-                        role: 'user'
-                    }).then(() => {
-                        alert('Akun dompet berhasil dibuat! Silakan masuk.');
-                        beralihMenuAuth('masuk');
-                    }).catch(err => alert("Gagal menyimpan data: " + err.message));
+                    db.ref('users/' + u).set({ password: p, question: q, answer: a }).then(() => {
+                        alert('Akun Sukses Dibuat! Silakan Masuk.');
+                        toggle('login');
+                    });
                 }
             });
         }
 
-        function eksekusiLoginSistem() {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
+        function login() {
+            const u = document.getElementById('log-user').value.trim().toLowerCase();
+            const p = document.getElementById('log-pass').value;
 
-            if (!user || !pass) return alert('Username dan kata sandi wajib diisi!');
+            if (!u || !p) return alert('Username & password wajib diisi!');
 
-            if (user === 'admin' && pass === 'AdminSuperPass123!') {
-                inisialisasiSesiSistem('admin', 'admin');
+            if (u === 'admin' && p === 'AdminSuperPass123!') {
+                masukDasbor('ADMINISTRATOR');
                 return;
             }
 
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    if (userData.password === pass) {
-                        inisialisasiSesiSistem(user, userData.role);
-                    } else {
-                        alert('Kata sandi salah!');
-                    }
+            db.ref('users/' + u).once('value', target => {
+                if (target.exists() && target.val().password === p) {
+                    masukDasbor(u);
                 } else {
-                    alert('Username tidak terdaftar!');
+                    alert('Username atau Password Anda Salah!');
                 }
             });
         }
-                function cekPertanyaanPemulihan() {
-            const user = document.getElementById('reset-user').value.trim().toLowerCase();
-            if (!user) return alert('Masukkan username pelacakan!');
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    document.getElementById('lbl-question').innerText = `Pertanyaan Keamanan: "${snapshot.val().question}"`;
-                    document.getElementById('security-question-area').style.display = 'block';
-                } else { alert('Username tidak ditemukan!'); }
-            });
+
+        function masukDasbor(username) {
+            document.getElementById('div-login').style.display = 'none';
+            document.getElementById('div-daftar').style.display = 'none';
+            document.getElementById('div-app').style.display = 'block';
+            document.getElementById('user-badge').innerText = username.toUpperCase();
         }
 
-        function eksekusiResetSandi() {
-            const user = document.getElementById('reset-user').value.trim().toLowerCase();
-            const answer = document.getElementById('reset-answer').value.trim().toLowerCase();
-            const newPass = document.getElementById('reset-new-pass').value;
-            if (!answer || !newPass) return alert('Isi jawaban verifikasi dan kata sandi baru!');
-            database.ref('users/' + user).once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val().answer === answer) {
-                    database.ref('users/' + user + '/password').set(newPass).then(() => {
-                        alert('Kata sandi diperbarui!');
-                        beralihMenuAuth('masuk');
-                    });
-                } else { alert('Jawaban pemulihan salah!'); }
-            });
-        }
-
-        function inisialisasiSesiSistem(username, role) {
-            sesiPenggunaAktif = username;
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-badge-display').innerText = username.toUpperCase();
-            alert('Selamat Datang! Login Berhasil.');
-        }
-
-        function logoutSistem() {
-            sesiPenggunaAktif = null;
-            document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('auth-screen').style.display = 'flex';
-            beralihMenuAuth('masuk');
+        function logout() {
+            document.getElementById('log-user').value = '';
+            document.getElementById('log-pass').value = '';
+            document.getElementById('div-app').style.display = 'none';
+            document.getElementById('div-login').style.display = 'block';
         }
     </script>
 </body>
