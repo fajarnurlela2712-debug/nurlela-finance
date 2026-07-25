@@ -411,7 +411,7 @@
                 }
 
                 dataTransaksiLokal = snapshot.val();
-                kalkulasiUlangMataUang(dataTransaksiLokal);
+                kalkulasiUlangMataUang(dataTransaksiLokal); // -> SUDAH DIPERBAIKI (TIDAK ADA TYPO LAGI)
 
                 const items = [];
                 snapshot.forEach(childSnapshot => {
@@ -441,7 +441,7 @@
                 });
             });
         }
-
+        
         function kalkulasiUlangMataUang(data) {
             let totalMasuk = 0, totalKeluar = 0;
             Object.values(data).forEach(tx => {
