@@ -400,26 +400,14 @@
                 if (snap.exists() && snap.data().password === pass) {
                     jumlahPercobaanGagal = 0;
                     userAktif = snap.data();
-                    
+ 
                     document.getElementById("login-user").value = "";
                     document.getElementById("login-pass").value = "";
-                    
-                    let badge = document.getElementById("current-user-badge");
-                    if (userAktif.role === "admin") {
-                        badge.innerText = "Super Admin";
-                        badge.classList.add("admin-badge");
-                        document.getElementById("admin-panel").style.display = "block";
-                    } else {
-                        badge.innerText = `@${userAktif.username}`;
-                        badge.classList.remove("admin-badge");
-                        document.getElementById("admin-panel").style.display = "none";
-                    }
  
-                    document.getElementById("auth-screen").style.display = "none";
-                    document.getElementById("main-app").style.display = "block";
-                    
-                    segarkanAktivitasSesi();
-                    aktifkanRealtimeListenerFinansial();
+                    // SIMPAN SESI: agar tidak logout otomatis saat halaman di-refresh
+                    localStorage.setItem("sesiAktifUsername", userAktif.username);
+ 
+                    tampilkanDashboard();
                 } else {
                     jumlahPercobaanGagal++;
                     if (jumlahPercobaanGagal >= 3) {
@@ -429,6 +417,47 @@
                 }
             } catch (e) { alert("Gagal terhubung ke Cloud: " + e.message); }
         };
+ 
+        // --- TAMPILKAN DASHBOARD (dipakai saat login manual maupun pemulihan sesi) ---
+        function tampilkanDashboard() {
+            let badge = document.getElementById("current-user-badge");
+            if (userAktif.role === "admin") {
+                badge.innerText = "Super Admin";
+                badge.classList.add("admin-badge");
+                document.getElementById("admin-panel").style.display = "block";
+            } else {
+                badge.innerText = `@${userAktif.username}`;
+                badge.classList.remove("admin-badge");
+                document.getElementById("admin-panel").style.display = "none";
+            }
+ 
+            document.getElementById("auth-screen").style.display = "none";
+            document.getElementById("main-app").style.display = "block";
+ 
+            segarkanAktivitasSesi();
+            aktifkanRealtimeListenerFinansial();
+        }
+ 
+        // --- PEMULIHAN SESI OTOMATIS SAAT HALAMAN DI-REFRESH ---
+        window.addEventListener("DOMContentLoaded", async () => {
+            let sesiTersimpan = localStorage.getItem("sesiAktifUsername");
+            if (!sesiTersimpan) return;
+ 
+            try {
+                let userRef = doc(db, "pengguna", sesiTersimpan);
+                let snap = await getDoc(userRef);
+                if (snap.exists()) {
+                    userAktif = snap.data();
+                    tampilkanDashboard();
+                } else {
+                    // Akun sudah tidak ada di server, bersihkan sesi lama
+                    localStorage.removeItem("sesiAktifUsername");
+                }
+            } catch (e) {
+                console.error("Gagal memulihkan sesi:", e.message);
+            }
+        });
+ 
         // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
         function aktifkanRealtimeListenerFinansial() {
             // Live Stream 1: Memantau seluruh transaksi keuangan dari server Google Jakarta secara real-time
@@ -682,6 +711,7 @@
  
         window.eksekusiLogoutSistem = function() {
             userAktif = null;
+            localStorage.removeItem("sesiAktifUsername");
             clearTimeout(timerSesiOtomatis);
             document.getElementById("main-app").style.display = "none";
             document.getElementById("auth-screen").style.display = "flex";
