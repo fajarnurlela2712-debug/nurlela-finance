@@ -3,75 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nurlela Finance - Firebase Enterprise Wallet</title>
+    <title>Nurlela Finance</title>
     <style>
-        :root {
-            --bg-main: #060913;
-            --bg-card: #111a2e;
-            --primary: #38bdf8;
-            --success: #10b981;
-            --danger: #f43f5e;
-            --text: #f8fafc;
-            --text-muted: #64748b;
-        }
-        body {
-            margin: 0; background-color: var(--bg-main); color: var(--text);
-            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
-        }
-        #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-main); z-index: 100; display: flex;
-            flex-direction: column; justify-content: center; align-items: center; 
-            padding: 15px; box-sizing: border-box; overflow-y: auto;
-        }
-        .auth-box {
-            background-color: var(--bg-card); padding: 30px; border-radius: 24px;
-            width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6); box-sizing: border-box; text-align: center;
-        }
+        :root { --bg-main: #060913; --bg-card: #111a2e; --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; --text: #f8fafc; --text-muted: #64748b; }
+        body { margin: 0; background-color: var(--bg-main); color: var(--text); font-family: sans-serif; padding-bottom: 30px; }
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-main); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .auth-box { background-color: var(--bg-card); padding: 30px; border-radius: 24px; width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .auth-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
         .auth-title span { color: var(--primary); }
-        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px; }
+        .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
         .link { color: var(--primary); cursor: pointer; font-size: 13px; margin-top: 15px; display: inline-block; font-weight: 600; }
         
         #main-app { display: none; padding: 20px; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-size: 20px; font-weight: 800; }
         .logo span { color: var(--primary); }
-        .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
-        .btn-logout { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
+        .btn-logout { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
         
-        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px; padding: 25px; margin-top: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
+        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px; padding: 25px; margin-top: 20px; }
         .bal-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
         .bal-amount { font-size: 32px; font-weight: 700; margin: 8px 0 20px 0; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+        .stat-val { font-size: 16px; font-weight: 600; }
         .amt-inc { color: var(--success); } .amt-exp { color: var(--danger); }
         
         .form-section, .history-section { margin-top: 30px; }
-        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-group { margin-bottom: 15px; text-align: left; }
+        .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
+        .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-        
         input, select { width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none; }
         input:focus, select:focus { border-color: var(--primary); }
-        .btn-submit { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
+        .btn-submit { width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px; color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; }
         
         .tx-list { display: flex; flex-direction: column; gap: 10px; }
         .tx-item { background-color: #131c2e; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .tx-left { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-        .tx-desc { font-size: 15px; font-weight: 600; }
-        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; width: max-content; }
-        .tx-date { font-size: 12px; color: #94a3b8; margin-left: 6px; }
-        .tx-right { display: flex; align-items: center; gap: 12px; }
+        .tx-desc { font-size: 15px; font-weight: 600; display: block; }
+        .tx-owner { font-size: 11px; color: var(--primary); font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        .tx-date { font-size: 12px; color: #94a3b8; margin-left: 8px; }
         .tx-amount { font-size: 15px; font-weight: 700; }
-        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 16px; padding: 4px; }
+        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding-left: 10px; }
         .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
     </style>
 </head>
 <body>
     <div id="auth-screen">
-        <!-- FORM LOGIN UTAMA -->
+        <!-- FORM LOGIN -->
         <div id="login-box" class="auth-box">
             <div class="auth-title">Nurlela<span>Finance</span></div>
             <div class="auth-subtitle">Firebase Real-time Wallet</div>
@@ -83,7 +61,7 @@
             </div>
         </div>
 
-        <!-- FORM PENDAFTARAN AKUN BARU -->
+        <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
@@ -98,7 +76,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD UTAMA APLIKASI KEUANGAN -->
+    <!-- DASHBOARD UTAMA APLIKASI -->
     <div id="main-app">
         <header class="header">
             <div class="logo">Nurlela<span>Finance</span></div>
@@ -108,7 +86,7 @@
             </div>
         </header>
 
-        <!-- KARTU MONITORED SALDO KAS -->
+        <!-- KARTU SALDO UTAMA -->
         <section class="balance-card">
             <div class="bal-label">Total Saldo Dompet</div>
             <div id="total-balance" class="bal-amount">Rp 0</div>
@@ -128,7 +106,7 @@
         <section class="form-section">
             <div class="section-title">Catat Transaksi Finansial</div>
             <div class="input-group">
-                <label>Deskripsi Keperluan / Acara</label>
+                <label>Deskripsi Keperluan</label>
                 <input type="text" id="tx-desc" placeholder="Contoh: Belanja Bulanan, Gaji Pokok" autocomplete="off">
             </div>
             <div class="input-group">
@@ -145,7 +123,7 @@
             <button class="btn-submit" onclick="simpanTransaksiSistem()">Simpan Catatan Transaksi</button>
         </section>
 
-        <!-- ARSIP DAFTAR RIWAYAT ARUS KAS -->
+        <!-- RIWAYAT ARUS KAS -->
         <section class="history-section">
             <div class="section-title">Riwayat Arus Kas Real-time</div>
             <div id="transaction-container" class="tx-list">
@@ -153,18 +131,16 @@
             </div>
         </section>
     </div>
-        <!-- SDK UTAMA FIREBASE CORE DAN DATABASE (WAJIB COUPLING DI SINI) -->
+        <!-- PUSTAKA INTI FIREBASE WAJIB BERADA DI LUAR TAG SCRIPT UTAMA -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     
     <script>
-        // Fitur pelacak kendala otomatis langsung ke layar HP Anda
         window.onerror = function(msg, url, linenumber) {
-            alert('Laporan Masalah Sistem: ' + msg + '\nBaris: ' + linenumber);
+            alert('Laporan Masalah: ' + msg + '\nBaris: ' + linenumber);
             return true;
         };
 
-        // Deklarasi variabel global agar terbaca oleh semua fungsi
         var database;
         let sesiPenggunaAktif = null;
         let dataTransaksiLokal = {};
@@ -177,11 +153,10 @@
                 databaseURL: "https://firebasedatabase.app",
                 projectId: "nurlela-finance"
             };
-            
             firebase.initializeApp(firebaseConfig);
-            database = firebase.database(); // Pengisian objek database aman dari undefined
+            database = firebase.database();
         } catch (e) {
-            alert('Firebase gagal tersambung: ' + e.message);
+            alert('Firebase gagal terkoneksi: ' + e.message);
         }
 
         function toggleAuth(menu) {
@@ -190,91 +165,72 @@
         }
 
         function eksekusiDaftarSistem() {
-            try {
-                const user = document.getElementById('reg-user').value.trim().toLowerCase();
-                const pass = document.getElementById('reg-pass').value;
-                const q = document.getElementById('reg-q').value.trim();
-                const a = document.getElementById('reg-a').value.trim().toLowerCase();
+            const user = document.getElementById('reg-user').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value;
+            const q = document.getElementById('reg-q').value.trim();
+            const a = document.getElementById('reg-a').value.trim().toLowerCase();
 
-                if (!user || !pass || !q || !a) return alert('Mohon isi semua data formulir!');
-                if (user === 'admin') return alert('Username "admin" dilindungi otoritas!');
+            if (!user || !pass || !q || !a) return alert('Mohon isi semua data formulir!');
+            if (user === 'admin') return alert('Username "admin" dilindungi!');
 
-                database.ref('users/' + user).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        alert('Username tersebut sudah digunakan orang lain!');
-                    } else {
-                        database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
-                            alert('Akun Dompet Sukses Dibuat! Silakan Masuk.');
-                            toggleAuth('login');
-                            document.getElementById('reg-user').value = '';
-                            document.getElementById('reg-pass').value = '';
-                            document.getElementById('reg-q').value = '';
-                            document.getElementById('reg-a').value = '';
-                        }).catch(err => alert('Gagal menyimpan data: ' + err.message));
-                    }
-                });
-            } catch(e) { alert('Eror fungsi daftar: ' + e.message); }
+            database.ref('users/' + user).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    alert('Username sudah terdaftar!');
+                } else {
+                    database.ref('users/' + user).set({ password: pass, question: q, answer: a, role: 'user' }).then(() => {
+                        alert('Akun Sukses Dibuat! Silakan Masuk.');
+                        toggleAuth('login');
+                    });
+                }
+            });
         }
 
         function eksekusiLoginSistem() {
-            try {
-                const user = document.getElementById('login-user').value.trim().toLowerCase();
-                const pass = document.getElementById('login-pass').value;
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
 
-                if (!user || !pass) return alert('Username & Password wajib diisi!');
+            if (!user || !pass) return alert('Username & Password harus diisi!');
 
-                if (user === 'admin' && pass === 'AdminSuperPass123!') {
-                    inisialisasiSesiSistem('admin', 'admin');
-                    return;
+            if (user === 'admin' && pass === 'AdminSuperPass123!') {
+                inisialisasiSesiSistem('admin', 'admin');
+                return;
+            }
+
+            database.ref('users/' + user).once('value', snapshot => {
+                if (snapshot.exists() && snapshot.val().password === pass) {
+                    inisialisasiSesiSistem(user, snapshot.val().role || 'user');
+                } else {
+                    alert('Username atau Password Salah!');
                 }
-
-                database.ref('users/' + user).once('value', snapshot => {
-                    if (snapshot.exists() && snapshot.val().password === pass) {
-                        inisialisasiSesiSistem(user, snapshot.val().role || 'user');
-                    } else {
-                        alert('Username atau Sandi Keamanan Anda Salah!');
-                    }
-                });
-            } catch(e) { alert('Eror fungsi login: ' + e.message); }
+            });
         }
 
         function inisialisasiSesiSistem(username, role) {
             sesiPenggunaAktif = username;
             perananUser = role;
-            
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-badge-display').innerText = username.toUpperCase();
 
             if (role === 'admin') {
-                database.ref('transactions').on('value', snapshot => {
-                    prosesDataTransaksi(snapshot);
-                });
+                database.ref('transactions').on('value', snapshot => { prosesDataTransaksi(snapshot); });
             } else {
-                database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => {
-                    prosesDataTransaksi(snapshot);
-                });
+                database.ref('transactions').orderByChild('owner').equalTo(username).on('value', snapshot => { prosesDataTransaksi(snapshot); });
             }
         }
 
         function prosesDataTransaksi(snapshot) {
             const container = document.getElementById('transaction-container');
             container.innerHTML = '';
-            
             if (!snapshot.exists()) {
-                container.innerHTML = '<div class="no-data">Belum ada aktivitas transaksi terekam.</div>';
+                container.innerHTML = '<div class="no-data">Belum ada aktivitas transaksi.</div>';
                 kalkulasiArusFinansial({});
                 return;
             }
-
             dataTransaksiLokal = snapshot.val();
             kalkulasiArusFinansial(dataTransaksiLokal);
-
             const items = [];
-            snapshot.forEach(child => {
-                items.unshift({ id: child.key, ...child.val() });
-            });
-
+            snapshot.forEach(child => { items.unshift({ id: child.key, ...child.val() }); });
             items.forEach(tx => {
                 const isIncome = tx.type === 'income';
                 const div = document.createElement('div');
@@ -282,18 +238,12 @@
                 div.innerHTML = `
                     <div class="tx-left">
                         <span class="tx-desc">${tx.description}</span>
-                        <div>
-                            <span class="tx-owner">USER: ${tx.owner.toUpperCase()}</span>
-                            <span class="tx-date">${tx.date}</span>
-                        </div>
+                        <div><span class="tx-owner">USER: ${tx.owner.toUpperCase()}</span><span class="tx-date">${tx.date}</span></div>
                     </div>
                     <div class="tx-right">
-                        <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">
-                            ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
-                        </span>
+                        <span class="tx-amount ${isIncome ? 'amt-inc' : 'amt-exp'}">${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}</span>
                         <button class="btn-del" onclick="hapusTransaksi('${tx.id}')">🗑️</button>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(div);
             });
         }
@@ -304,9 +254,7 @@
                 if (tx.type === 'income') masuk += parseInt(tx.amount);
                 else keluar += parseInt(tx.amount);
             });
-            const sisa = masuk - keluar;
-
-            document.getElementById('total-balance').innerText = formatRupiah(sisa);
+            document.getElementById('total-balance').innerText = formatRupiah(masuk - keluar);
             document.getElementById('total-income').innerText = formatRupiah(masuk);
             document.getElementById('total-expense').innerText = formatRupiah(keluar);
         }
@@ -315,17 +263,8 @@
             const desc = document.getElementById('tx-desc').value.trim();
             const amount = document.getElementById('tx-amount').value;
             const type = document.getElementById('tx-type').value;
-
-            if (!desc || !amount) return alert('Harap isi deskripsi dan nominal uang!');
-
-            const paketData = {
-                description: desc,
-                amount: parseInt(amount),
-                type: type,
-                owner: sesiPenggunaAktif,
-                date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
-            };
-
+            if (!desc || !amount) return alert('Isi deskripsi dan nominal!');
+            const paketData = { description: desc, amount: parseInt(amount), type: type, owner: sesiPenggunaAktif, date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) };
             database.ref('transactions').push(paketData).then(() => {
                 document.getElementById('tx-desc').value = '';
                 document.getElementById('tx-amount').value = '';
@@ -334,20 +273,14 @@
         }
 
         function hapusTransaksi(id) {
-            if (confirm('Hapus arsip catatan riwayat transaksi ini secara permanen?')) {
-                database.ref('transactions/' + id).remove();
-            }
+            if (confirm('Hapus riwayat transaksi ini?')) { database.ref('transactions/' + id).remove(); }
         }
 
-        function formatRupiah(angka) {
-            return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
-        }
+        function formatRupiah(angka) { return 'Rp ' + parseInt(angka).toLocaleString('id-ID'); }
 
         function logoutSistem() {
             database.ref('transactions').off();
             sesiPenggunaAktif = null;
-            dataTransaksiLokal = {};
-            
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('main-app').style.display = 'none';
@@ -357,5 +290,3 @@
     </script>
 </body>
 </html>
-
-    
