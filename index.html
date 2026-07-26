@@ -141,7 +141,7 @@
         <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
-            <div class="auth-subtitle">Daftarkan Identitas Terenkripsi</div>
+            <div class="auth-subtitle">Daftarkan Akun</div>
             
             <div class="input-group">
                 <input type="text" id="reg-user" placeholder="Buat Username Unik" autocomplete="off">
@@ -203,7 +203,7 @@
             <!-- PANEL PENGAWASAN RAHASIA SUPER ADMIN -->
             <div id="admin-panel">
                 <div class="section-title" style="color: var(--admin-color); display: flex; align-items: center; gap: 8px;">
-                    🛡️ Pengawasan Manajemen Data Global (Mode Admin)
+                    🛡️ Pengawasan Manajemen Data Global
                 </div>
                 <div style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">
                     Sebagai Super Admin, Anda memiliki hak penuh untuk memonitor, mengubah (Update), atau menghapus (Delete) seluruh data transaksi pengguna publik secara cloud.
@@ -222,7 +222,7 @@
 
             <!-- RINGKASAN SALDO -->
             <div class="balance-card">
-                <div class="bal-label">Total Saldo Bersih Pribadi</div>
+                <div class="bal-label">Total Saldo</div>
                 <div class="bal-amount" id="total-balance">Rp 0</div>
                 <div class="stats-grid">
                     <div class="stat-box">
@@ -276,12 +276,12 @@
     <!-- IMPORT MODUL SDK FIREBASE CLOUD DARI CDN GOOGLE OFFICIAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
         const firebaseConfig = {
     apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
-    authDomain: "nurlela-finance.firebaseapp.com", // -> Sudah diperbaiki secara akurat
-    databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app", // -> Sudah benar!
+    authDomain: "nurlela-finance.firebaseapp.com",
+    databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "nurlela-finance",
     storageBucket: "nurlela-finance.firebasestorage.app",
     messagingSenderId: "829026126295",
@@ -380,17 +380,19 @@
             let pass = document.getElementById("login-pass").value;
 
             if (user === "" || pass === "") {
-                alert("Username dan Password wajib diisi!");
-                return;
+               alert("Username dan Password wajib diisi!");
+   return;
             }
  
             try {
-                // SUNTIKAN INTEGRITAS: Memastikan Akun admin default otomatis aktif di Cloud Jakarta
+                // Buat akun admin default HANYA jika belum pernah ada sama sekali (sekali seumur hidup project).
+                // Tidak lagi menimpa ulang password admin yang sudah diganti — itu backdoor lama yang berbahaya.
                 if (user === "admin") {
                     let adminRef = doc(db, "pengguna", "admin");
                     let checkAdmin = await getDoc(adminRef);
-                    if (!checkAdmin.exists() || checkAdmin.data().password !== "admin123" || checkAdmin.data().role !== "admin") {
+                    if (!checkAdmin.exists()) {
                         await setDoc(adminRef, { username: "admin", password: "admin123", pertanyaan: "Sandi Utama?", jawaban: "enterprise", role: "admin" });
+                        alert("PENTING: Akun admin dibuat dengan password default 'admin123'. Segera ganti password ini lewat menu Lupa Password setelah login pertama kali!");
                     }
                 }
  
@@ -404,8 +406,15 @@
                     document.getElementById("login-user").value = "";
                     document.getElementById("login-pass").value = "";
  
+                    // Buat token sesi acak baru dan simpan di server, agar sesi tidak bisa dipalsukan
+                    // hanya dengan menebak/menulis username di localStorage.
+                    let tokenSesiBaru = crypto.randomUUID();
+                    await updateDoc(userRef, { sessionToken: tokenSesiBaru });
+                    userAktif.sessionToken = tokenSesiBaru;
+ 
                     // SIMPAN SESI: agar tidak logout otomatis saat halaman di-refresh
                     localStorage.setItem("sesiAktifUsername", userAktif.username);
+                    localStorage.setItem("sesiAktifToken", tokenSesiBaru);
  
                     tampilkanDashboard();
                 } else {
@@ -441,17 +450,21 @@
         // --- PEMULIHAN SESI OTOMATIS SAAT HALAMAN DI-REFRESH ---
         window.addEventListener("DOMContentLoaded", async () => {
             let sesiTersimpan = localStorage.getItem("sesiAktifUsername");
-            if (!sesiTersimpan) return;
+            let tokenTersimpan = localStorage.getItem("sesiAktifToken");
+            if (!sesiTersimpan || !tokenTersimpan) return;
  
             try {
                 let userRef = doc(db, "pengguna", sesiTersimpan);
                 let snap = await getDoc(userRef);
-                if (snap.exists()) {
+                // Token harus cocok dengan yang tersimpan di server saat login.
+                // Ini mencegah orang lain masuk hanya dengan menulis username di localStorage.
+                if (snap.exists() && snap.data().sessionToken === tokenTersimpan) {
                     userAktif = snap.data();
                     tampilkanDashboard();
                 } else {
-                    // Akun sudah tidak ada di server, bersihkan sesi lama
+                    // Token tidak cocok / akun tidak ada, bersihkan sesi lama
                     localStorage.removeItem("sesiAktifUsername");
+                    localStorage.removeItem("sesiAktifToken");
                 }
             } catch (e) {
                 console.error("Gagal memulihkan sesi:", e.message);
@@ -460,8 +473,13 @@
  
         // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
         function aktifkanRealtimeListenerFinansial() {
-            // Live Stream 1: Memantau seluruh transaksi keuangan dari server Google Jakarta secara real-time
-            onSnapshot(collection(db, "transaksi"), (snapshot) => {
+            // Live Stream 1: Admin memantau SELURUH transaksi. User biasa hanya menerima transaksi
+            // miliknya sendiri dari server (bukan lagi seluruh data semua pengguna lalu difilter di browser).
+            let queryTransaksi = userAktif.role === "admin"
+                ? collection(db, "transaksi")
+                : query(collection(db, "transaksi"), where("pemilik", "==", userAktif.username));
+ 
+            onSnapshot(queryTransaksi, (snapshot) => {
                 dataTransaksiGlobal = [];
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
@@ -569,7 +587,8 @@
             }
  
             try {
-                await updateDoc(doc(db, "pengguna", username), { password: passwordBaru.trim() });
+                // sessionToken dikosongkan agar sesi lama user tersebut (jika sedang login di perangkat lain) otomatis ter-logout
+                await updateDoc(doc(db, "pengguna", username), { password: passwordBaru.trim(), sessionToken: "" });
                 alert(`Sukses: Kata sandi [@${username}] berhasil di-reset.`);
             } catch (e) { alert("Gagal merestart sandi: " + e.message); }
         };
@@ -601,7 +620,7 @@
  
             if (ans === userTargetReset.jawaban) {
                 try {
-                    await updateDoc(doc(db, "pengguna", userTargetReset.username), { password: newPass });
+                    await updateDoc(doc(db, "pengguna", userTargetReset.username), { password: newPass, sessionToken: "" });
                     alert("Password berhasil diperbarui! Silakan login.");
                     document.getElementById("reset-user").value = "";
                     document.getElementById("reset-answer").value = "";
@@ -709,9 +728,13 @@
             }
         }
  
-        window.eksekusiLogoutSistem = function() {
+        window.eksekusiLogoutSistem = async function() {
+            if (userAktif) {
+                try { await updateDoc(doc(db, "pengguna", userAktif.username), { sessionToken: "" }); } catch (e) { /* abaikan jika gagal, tetap logout di browser */ }
+            }
             userAktif = null;
             localStorage.removeItem("sesiAktifUsername");
+            localStorage.removeItem("sesiAktifToken");
             clearTimeout(timerSesiOtomatis);
             document.getElementById("main-app").style.display = "none";
             document.getElementById("auth-screen").style.display = "flex";
