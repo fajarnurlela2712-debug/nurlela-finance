@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nurlela Finance - Firebase Enterprise Wallet</title>
+    <!-- Tambahan: Memuat API Google reCAPTCHA v2 -->
+    <script src="https://google.com" async defer></script>
     <style>
         :root {
             --bg-main: #060913;
@@ -19,7 +21,6 @@
             margin: 0; background-color: var(--bg-main); color: var(--text);
             font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
         }
-
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-main); z-index: 100; display: flex;
@@ -37,6 +38,14 @@
         .auth-toggle-text { font-size: 13px; text-align: center; margin-top: 20px; color: var(--text-muted); }
         .auth-link { color: var(--primary); cursor: pointer; font-weight: 600; }
 
+        /* Penyelarasan Wadah Kotak reCAPTCHA */
+        .recaptcha-container {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
         #main-app { display: none; }
         .header {
             padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -46,18 +55,14 @@
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
         .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
-
         .header-right { display: flex; align-items: center; gap: 12px; }
         .btn-logout {
             background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
             color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px;
             font-weight: 700; cursor: pointer; transition: all 0.2s;
         }
-
         .app-container { padding: 0 20px; }
-
         #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
-
         .balance-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
@@ -71,24 +76,20 @@
         .icon-inc { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
         .icon-exp { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
         .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
-
         .form-section { margin-top: 30px; }
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-
         input, select {
             width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
         }
         input:focus, select:focus { border-color: var(--primary); }
-
         .btn-submit {
             width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
             color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
             box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
-
         .history-section { margin-top: 35px; }
         .tx-list { display: flex; flex-direction: column; gap: 10px; }
         .tx-item {
@@ -103,7 +104,6 @@
         .tx-amount { font-size: 15px; font-weight: 700; }
         .amt-inc { color: var(--success); }
         .amt-exp { color: var(--danger); }
-
         .action-btns { display: flex; gap: 8px; }
         .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
         .btn-edit { color: var(--primary); }
@@ -125,7 +125,12 @@
                 <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
             </div>
 
-            <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
+            <!-- Widget reCAPTCHA v2 Form Login -->
+            <div class="recaptcha-container">
+                <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
+            </div>
+
+            <button id="btn-login" class="btn-submit" style="margin-top: 10px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
 
             <div class="auth-toggle-text">
                 Belum punya dompet? <span class="auth-link" onclick="beralihMenuAuth('daftar')">Daftar Akun Baru</span>
@@ -133,8 +138,7 @@
                 <span class="auth-link" style="color: var(--danger); font-size: 12px;" onclick="beralihMenuAuth('reset')">Lupa Kata Sandi?</span>
             </div>
         </div>
-
-        <!-- FORM DAFTAR BARU -->
+                <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Akun</div>
@@ -149,14 +153,19 @@
                 <input type="password" id="reg-pass" placeholder="Buat Kata Sandi (min. 6 karakter)">
             </div>
 
-            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
+            <!-- Widget reCAPTCHA v2 Form Daftar -->
+            <div class="recaptcha-container">
+                <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
+            </div>
+
+            <button class="btn-submit" style="margin-top: 10px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
 
             <div class="auth-toggle-text">
                 Sudah memiliki akses? <span class="auth-link" onclick="beralihMenuAuth('login')">Masuk Di Sini</span>
             </div>
         </div>
 
-        <!-- FORM RESET PASSWORD (via email asli, dikelola Firebase Auth) -->
+        <!-- FORM RESET PASSWORD -->
         <div id="reset-box" class="auth-box" style="display: none;">
             <div class="auth-title">Reset<span>Access</span></div>
             <div class="auth-subtitle">Kirim Link Reset ke Email Anda</div>
@@ -173,6 +182,7 @@
         </div>
     </div>
 
+    <!-- STRUKTUR MAIN DASHBOARD -->
     <div id="main-app">
         <div class="header">
             <div class="logo">Nurlela<span>Finance</span> <span id="current-user-badge" class="user-badge">User</span></div>
@@ -250,22 +260,21 @@
             </div>
         </div>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        <script type="module">
+        import { initializeApp } from "https://gstatic.com";
         import {
             getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
             onAuthStateChanged, signOut, sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        } from "https://gstatic.com";
         import {
             getFirestore, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot, serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        } from "https://gstatic.com";
 
         // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
         const firebaseConfig = {
             apiKey: "AIzaSyAMdyppEQO7kthQeaILllxUXkS9hj0e0j4",
-            authDomain: "nurlela-finance.firebaseapp.com",
-            databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebasedatabase.app",
             projectId: "nurlela-finance",
             storageBucket: "nurlela-finance.firebasestorage.app",
             messagingSenderId: "829026126295",
@@ -296,6 +305,11 @@
             document.getElementById("login-box").style.display = menu === 'login' ? 'block' : 'none';
             document.getElementById("register-box").style.display = menu === 'daftar' ? 'block' : 'none';
             document.getElementById("reset-box").style.display = menu === 'reset' ? 'block' : 'none';
+            
+            // Mereset status visual widget reCAPTCHA agar bersih kembali saat pindah form
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.reset();
+            }
         };
 
         function segarkanAktivitasSesi() {
@@ -314,6 +328,15 @@
 
         // --- SUBSISTEM REGISTER (Firebase Authentication) ---
         window.eksekusiDaftarSistem = async function() {
+            // Pengaman Utama: Cek verifikasi reCAPTCHA v2 Form Daftar (Indeks 1)
+            if (typeof grecaptcha !== 'undefined') {
+                const captchaResponse = grecaptcha.getResponse(1);
+                if (!captchaResponse) {
+                    alert("Harap centang verifikasi Keamanan (reCAPTCHA) untuk mendaftar!");
+                    return;
+                }
+            }
+
             let user = saringInputJahat(document.getElementById("reg-user").value.trim().toLowerCase());
             let email = document.getElementById("reg-email").value.trim();
             let pass = document.getElementById("reg-pass").value;
@@ -324,15 +347,14 @@
             }
 
             try {
-                // Cegah username dobel: cek dulu apakah sudah ada pemetaan usernames/{user}
                 let usernameRef = doc(db, "usernames", user);
                 let unameSnap = await getDoc(usernameRef);
                 if (unameSnap.exists()) {
                     alert("Username tersebut sudah terpakai!");
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
                     return;
                 }
 
-                // Firebase Auth yang menyimpan & meng-hash password — tidak lagi di Firestore
                 let cred = await createUserWithEmailAndPassword(auth, email, pass);
                 let uid = cred.user.uid;
 
@@ -343,8 +365,9 @@
                 document.getElementById("reg-user").value = "";
                 document.getElementById("reg-email").value = "";
                 document.getElementById("reg-pass").value = "";
-                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
             } catch (e) {
+                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
                 let pesan = e.message;
                 if (e.code === "auth/email-already-in-use") pesan = "Email tersebut sudah terdaftar.";
                 if (e.code === "auth/weak-password") pesan = "Password terlalu lemah (minimal 6 karakter).";
@@ -359,6 +382,15 @@
                 let sisaWaktu = Math.ceil((waktuKunciSampai - Date.now()) / 1000);
                 alert(`Sistem Dibekukan! Silakan tunggu ${sisaWaktu} detik lagi.`);
                 return;
+            }
+
+            // Pengaman Utama: Cek verifikasi reCAPTCHA v2 Form Login (Indeks 0)
+            if (typeof grecaptcha !== 'undefined') {
+                const captchaResponse = grecaptcha.getResponse(0);
+                if (!captchaResponse) {
+                    alert("Harap centang verifikasi Keamanan (reCAPTCHA) terlebih dahulu!");
+                    return;
+                }
             }
 
             let user = document.getElementById("login-user").value.trim().toLowerCase();
@@ -376,14 +408,14 @@
                 }
                 let email = unameSnap.data().email;
 
-                // Verifikasi password dilakukan oleh Firebase Auth sendiri (bukan dibandingkan manual di JS)
                 await signInWithEmailAndPassword(auth, email, pass);
 
                 jumlahPercobaanGagal = 0;
                 document.getElementById("login-user").value = "";
                 document.getElementById("login-pass").value = "";
-                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(0);
             } catch (e) {
+                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(0);
                 jumlahPercobaanGagal++;
                 if (e.code === "auth/too-many-requests") {
                     alert("Firebase mendeteksi terlalu banyak percobaan gagal pada akun ini. Coba lagi beberapa saat lagi.");
@@ -391,12 +423,11 @@
                     waktuKunciSampai = Date.now() + 30000;
                     alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
                 } else {
-          alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
+                    alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
                 }
             }
         };
- 
-        // --- TAMPILKAN DASHBOARD ---
+                    // --- TAMPILKAN DASHBOARD ---
         function tampilkanDashboard() {
             let badge = document.getElementById("current-user-badge");
             if (userAktif.role === "admin") {
@@ -416,13 +447,12 @@
             aktifkanRealtimeListenerFinansial();
         }
  
-        // --- SESI DIKELOLA LANGSUNG OLEH FIREBASE AUTH (aman, tidak bisa dipalsukan lewat localStorage) ---
+        // --- MANAJEMEN MONITOR STATUS FIREBASE AUTH ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     let snap = await getDoc(doc(db, "pengguna", user.uid));
                     if (!snap.exists()) {
-                        // Profil sudah dihapus (mis. oleh admin) tapi akun login masih ada — paksa keluar
                         await signOut(auth);
                         alert("Profil akun Anda tidak ditemukan. Silakan hubungi admin.");
                         return;
@@ -441,9 +471,7 @@
             }
         });
  
-        // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
-        // Menyimpan fungsi "matikan listener" agar bisa dipanggil saat logout —
-        // mencegah listener lama menumpuk kalau user logout-login berkali-kali.
+        // --- SINKRONISASI DATA EMISI CLOUD REALTIME ---
         let unsubscribeTransaksi = null;
         let unsubscribePengguna = null;
  
@@ -453,7 +481,7 @@
         }
  
         function aktifkanRealtimeListenerFinansial() {
-            matikanSemuaListener(); // pastikan tidak ada listener lama yang masih aktif sebelum pasang yang baru
+            matikanSemuaListener(); 
  
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
@@ -464,7 +492,6 @@
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
                 });
-                // ID dokumen sekarang acak (bukan Date.now()), jadi urutkan berdasarkan tanggal server, bukan ID
                 dataTransaksiGlobal.sort((a, b) => (b.tanggal?.toMillis() || 0) - (a.tanggal?.toMillis() || 0));
                 sinkronisasiVisualTampilan();
             });
@@ -479,7 +506,7 @@
                 });
             }
         }
- 
+                    // --- MANAJEMEN CRUD DATA TRANSAKSI ---
         window.eksekusiSimpanTransaksi = async function() {
             let targetId = document.getElementById("edit-target-id").value;
             let jenis = document.getElementById("tx-type").value;
@@ -493,8 +520,6 @@
  
             try {
                 if (targetId === "") {
-                    // Transaksi baru: ID dokumen dibuat otomatis oleh Firestore (acak, tidak akan tabrakan),
-                    // dan tanggal diambil dari jam SERVER (bukan jam HP user yang bisa disetel sembarangan).
                     await addDoc(collection(db, "transaksi"), {
                         pemilik: userAktif.username,
                         pemilikUid: userAktif.uid,
@@ -504,7 +529,6 @@
                         tanggal: serverTimestamp()
                     });
                 } else {
-                    // Edit transaksi lama: tanggal asli dipertahankan, tidak ikut berubah saat diedit
                     await updateDoc(doc(db, "transaksi", targetId), {
                         jenis: jenis,
                         deskripsi: desc,
@@ -550,10 +574,9 @@
             }
         };
  
-        // Menghapus PROFIL & data user. Akun login (email/password) di Firebase Auth tetap ada
-        // dan hanya bisa dihapus permanen lewat Firebase Console > Authentication (butuh Admin SDK untuk otomatisasi).
+        // --- OPERASIONAL KONTROL SUPER ADMIN ---
         window.hapusPenggunaOlehAdmin = async function(uid, username) {
-            if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console > Authentication.`)) return;
+            if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console.`)) return;
  
             try {
                 await deleteDoc(doc(db, "pengguna", uid));
@@ -567,8 +590,6 @@
             } catch (e) { alert("Gagal menghapus user: " + e.message); }
         };
  
-        // Admin tidak lagi bisa menyetel password user lain secara langsung (memang tidak diizinkan
-        // Firebase Auth tanpa server Admin SDK). Sebagai gantinya, admin memicu email reset resmi.
         window.kirimResetPasswordOlehAdmin = async function(email, username) {
             if (!confirm(`Kirim email reset password ke [@${username}] (${email})?`)) return;
             try {
@@ -585,14 +606,13 @@
             }
             try {
                 await sendPasswordResetEmail(auth, email);
-                alert("Link reset password telah dikirim ke email Anda. Silakan cek inbox (atau folder spam).");
+                alert("Link reset password telah dikirim ke email Anda. Silakan cek inbox.");
                 document.getElementById("reset-email").value = "";
                 beralihMenuAuth('login');
             } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
  
-        // tanggal sekarang berupa Firestore Timestamp (dari serverTimestamp()), bukan teks biasa.
-        // Sesaat setelah dibuat (sebelum server konfirmasi), nilainya bisa null dulu — ditangani di sini.
+        // --- SISTEM UTILITAS FORMAT & PENYEGARAN TAMPILAN ---
         function formatTanggal(ts) {
             if (!ts) return "Baru saja";
             return ts.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -604,9 +624,8 @@
             document.getElementById("tx-amount").value = "";
             document.getElementById("form-action-title").innerText = "Catat Transaksi Baru";
             document.getElementById("btn-main-action").innerText = "Amankan Transaksi";
-        }
- 
-        function sinkronisasiVisualTampilan() {
+                    }
+                    function sinkronisasiVisualTampilan() {
             let saldoNetto = 0, masuk = 0, keluar = 0;
             let htmlPribadi = "";
             let htmlAdminGlobal = "";
@@ -697,8 +716,9 @@
             }
         }
  
+        // --- LOGOUT AMAN ---
         window.eksekusiLogoutSistem = async function() {
-            try { await signOut(auth); } catch (e) { /* abaikan, tetap kembali ke layar login */ }
+            try { await signOut(auth); } catch (e) { }
             clearTimeout(timerSesiOtomatis);
             beralihMenuAuth('login');
             resetFormulirInput();
