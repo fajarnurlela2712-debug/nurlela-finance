@@ -258,7 +258,7 @@
             onAuthStateChanged, signOut, sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import {
-            getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot
+            getFirestore, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
@@ -391,7 +391,7 @@
                     waktuKunciSampai = Date.now() + 30000;
                     alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
                 } else {
-                 alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
+          alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
                 }
             }
         };
@@ -434,6 +434,7 @@
                 }
             } else {
                 userAktif = null;
+                matikanSemuaListener();
                 clearTimeout(timerSesiOtomatis);
                 document.getElementById("main-app").style.display = "none";
                 document.getElementById("auth-screen").style.display = "flex";
@@ -441,22 +442,35 @@
         });
  
         // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
+        // Menyimpan fungsi "matikan listener" agar bisa dipanggil saat logout —
+        // mencegah listener lama menumpuk kalau user logout-login berkali-kali.
+        let unsubscribeTransaksi = null;
+        let unsubscribePengguna = null;
+ 
+        function matikanSemuaListener() {
+            if (unsubscribeTransaksi) { unsubscribeTransaksi(); unsubscribeTransaksi = null; }
+            if (unsubscribePengguna) { unsubscribePengguna(); unsubscribePengguna = null; }
+        }
+ 
         function aktifkanRealtimeListenerFinansial() {
+            matikanSemuaListener(); // pastikan tidak ada listener lama yang masih aktif sebelum pasang yang baru
+ 
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
                 : query(collection(db, "transaksi"), where("pemilikUid", "==", userAktif.uid));
  
-            onSnapshot(queryTransaksi, (snapshot) => {
+            unsubscribeTransaksi = onSnapshot(queryTransaksi, (snapshot) => {
                 dataTransaksiGlobal = [];
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
                 });
-                dataTransaksiGlobal.sort((a, b) => b.id - a.id);
+                // ID dokumen sekarang acak (bukan Date.now()), jadi urutkan berdasarkan tanggal server, bukan ID
+                dataTransaksiGlobal.sort((a, b) => (b.tanggal?.toMillis() || 0) - (a.tanggal?.toMillis() || 0));
                 sinkronisasiVisualTampilan();
             });
  
             if (userAktif.role === "admin") {
-                onSnapshot(collection(db, "pengguna"), (snapshot) => {
+                unsubscribePengguna = onSnapshot(collection(db, "pengguna"), (snapshot) => {
                     daftarPengguna = [];
                     snapshot.forEach((doc) => {
                         daftarPengguna.push({ uid: doc.id, ...doc.data() });
@@ -477,18 +491,26 @@
                 return;
             }
  
-            let idTransaksi = targetId === "" ? String(Date.now()) : targetId;
-            let itemLama = targetId === "" ? null : dataTransaksiGlobal.find(t => t.id === targetId);
- 
             try {
-                await setDoc(doc(db, "transaksi", idTransaksi), {
-                    pemilik: itemLama ? itemLama.pemilik : userAktif.username,
-                    pemilikUid: itemLama ? itemLama.pemilikUid : userAktif.uid,
-                    jenis: jenis,
-                    deskripsi: desc,
-                    nominal: nominal,
-                    tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-                }, { merge: true });
+                if (targetId === "") {
+                    // Transaksi baru: ID dokumen dibuat otomatis oleh Firestore (acak, tidak akan tabrakan),
+                    // dan tanggal diambil dari jam SERVER (bukan jam HP user yang bisa disetel sembarangan).
+                    await addDoc(collection(db, "transaksi"), {
+                        pemilik: userAktif.username,
+                        pemilikUid: userAktif.uid,
+                        jenis: jenis,
+                        deskripsi: desc,
+                        nominal: nominal,
+                        tanggal: serverTimestamp()
+                    });
+                } else {
+                    // Edit transaksi lama: tanggal asli dipertahankan, tidak ikut berubah saat diedit
+                    await updateDoc(doc(db, "transaksi", targetId), {
+                        jenis: jenis,
+                        deskripsi: desc,
+                        nominal: nominal
+                    });
+                }
  
                 resetFormulirInput();
             } catch (e) { alert("Gagal menyimpan ke Cloud: " + e.message); }
@@ -569,6 +591,13 @@
             } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
  
+        // tanggal sekarang berupa Firestore Timestamp (dari serverTimestamp()), bukan teks biasa.
+        // Sesaat setelah dibuat (sebelum server konfirmasi), nilainya bisa null dulu — ditangani di sini.
+        function formatTanggal(ts) {
+            if (!ts) return "Baru saja";
+            return ts.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+ 
         function resetFormulirInput() {
             document.getElementById("edit-target-id").value = "";
             document.getElementById("tx-desc").value = "";
@@ -599,7 +628,7 @@
                         <div class="tx-item">
                             <div class="tx-left">
                                 <div class="tx-desc">${t.deskripsi}</div>
-                                <div class="tx-date">${t.tanggal}</div>
+                                <div class="tx-date">${formatTanggal(t.tanggal)}</div>
                             </div>
                             <div class="tx-right">
                                 <div class="tx-amount ${color}">${sign} Rp ${t.nominal.toLocaleString('id-ID')}</div>
@@ -630,7 +659,7 @@
                                 <div class="tx-left">
                                     <div class="tx-desc">${t.deskripsi}</div>
                                     <div style="margin-top:4px;"><span class="tx-owner">User: ${t.pemilik}</span></div>
-                                    <div class="tx-date" style="margin-top:4px;">${t.tanggal}</div>
+                                    <div class="tx-date" style="margin-top:4px;">${formatTanggal(t.tanggal)}</div>
                                 </div>
                                 <div class="tx-right">
                                     <div class="tx-amount ${color}">${sign} Rp ${t.nominal.toLocaleString('id-ID')}</div>
