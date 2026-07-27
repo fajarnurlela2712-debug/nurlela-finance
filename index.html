@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nurlela Finance - Firebase Enterprise Wallet</title>
-    <!-- Tambahan: Memuat API Google reCAPTCHA v2 -->
+    <!-- Tambahan: Skrip Google reCAPTCHA -->
     <script src="https://google.com" async defer></script>
     <style>
         :root {
@@ -21,6 +21,7 @@
             margin: 0; background-color: var(--bg-main); color: var(--text);
             font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
         }
+
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-main); z-index: 100; display: flex;
@@ -38,14 +39,6 @@
         .auth-toggle-text { font-size: 13px; text-align: center; margin-top: 20px; color: var(--text-muted); }
         .auth-link { color: var(--primary); cursor: pointer; font-weight: 600; }
 
-        /* Penyelarasan Wadah Kotak reCAPTCHA */
-        .recaptcha-container {
-            margin: 15px 0;
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
         #main-app { display: none; }
         .header {
             padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -55,14 +48,18 @@
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
         .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
+
         .header-right { display: flex; align-items: center; gap: 12px; }
         .btn-logout {
             background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
             color: var(--danger); padding: 8px 16px; border-radius: 10px; font-size: 13px;
             font-weight: 700; cursor: pointer; transition: all 0.2s;
         }
+
         .app-container { padding: 0 20px; }
+
         #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
+
         .balance-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
@@ -76,20 +73,24 @@
         .icon-inc { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
         .icon-exp { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
         .stat-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
         .form-section { margin-top: 30px; }
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+
         input, select {
             width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
         }
         input:focus, select:focus { border-color: var(--primary); }
+
         .btn-submit {
             width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
             color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
             box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
+
         .history-section { margin-top: 35px; }
         .tx-list { display: flex; flex-direction: column; gap: 10px; }
         .tx-item {
@@ -104,11 +105,15 @@
         .tx-amount { font-size: 15px; font-weight: 700; }
         .amt-inc { color: var(--success); }
         .amt-exp { color: var(--danger); }
+
         .action-btns { display: flex; gap: 8px; }
         .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
         .btn-edit { color: var(--primary); }
         .btn-del { color: var(--danger); }
         .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
+        
+        /* Tambahan wadah agar posisi captcha rapi di HP */
+        .g-recaptcha { margin: 15px 0; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
@@ -125,12 +130,10 @@
                 <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
             </div>
 
-            <!-- Widget reCAPTCHA v2 Form Login -->
-            <div class="recaptcha-container">
-                <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
-            </div>
+            <!-- Tambahan Wadah Captcha Login -->
+            <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
 
-            <button id="btn-login" class="btn-submit" style="margin-top: 10px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
+            <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
 
             <div class="auth-toggle-text">
                 Belum punya dompet? <span class="auth-link" onclick="beralihMenuAuth('daftar')">Daftar Akun Baru</span>
@@ -138,7 +141,8 @@
                 <span class="auth-link" style="color: var(--danger); font-size: 12px;" onclick="beralihMenuAuth('reset')">Lupa Kata Sandi?</span>
             </div>
         </div>
-                <!-- FORM DAFTAR BARU -->
+
+        <!-- FORM DAFTAR BARU -->
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Akun</div>
@@ -153,19 +157,16 @@
                 <input type="password" id="reg-pass" placeholder="Buat Kata Sandi (min. 6 karakter)">
             </div>
 
-            <!-- Widget reCAPTCHA v2 Form Daftar -->
-            <div class="recaptcha-container">
-                <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
-            </div>
+            <!-- Tambahan Wadah Captcha Daftar -->
+            <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
 
-            <button class="btn-submit" style="margin-top: 10px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
+            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
 
             <div class="auth-toggle-text">
                 Sudah memiliki akses? <span class="auth-link" onclick="beralihMenuAuth('login')">Masuk Di Sini</span>
             </div>
         </div>
-
-        <!-- FORM RESET PASSWORD -->
+                <!-- FORM RESET PASSWORD -->
         <div id="reset-box" class="auth-box" style="display: none;">
             <div class="auth-title">Reset<span>Access</span></div>
             <div class="auth-subtitle">Kirim Link Reset ke Email Anda</div>
@@ -182,7 +183,6 @@
         </div>
     </div>
 
-    <!-- STRUKTUR MAIN DASHBOARD -->
     <div id="main-app">
         <div class="header">
             <div class="logo">Nurlela<span>Finance</span> <span id="current-user-badge" class="user-badge">User</span></div>
@@ -306,10 +306,8 @@
             document.getElementById("register-box").style.display = menu === 'daftar' ? 'block' : 'none';
             document.getElementById("reset-box").style.display = menu === 'reset' ? 'block' : 'none';
             
-            // Mereset status visual widget reCAPTCHA agar bersih kembali saat pindah form
-            if (typeof grecaptcha !== 'undefined') {
-                grecaptcha.reset();
-            }
+            // Aturan Reset Captcha agar tidak eror token kedaluwarsa saat pindah form
+            if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
         };
 
         function segarkanAktivitasSesi() {
@@ -328,8 +326,8 @@
 
         // --- SUBSISTEM REGISTER (Firebase Authentication) ---
         window.eksekusiDaftarSistem = async function() {
-            // Pengaman Utama: Cek verifikasi reCAPTCHA v2 Form Daftar (Indeks 1)
-            if (typeof grecaptcha !== 'undefined') {
+            // INTEGRASI KEAMANAN: Memvalidasi reCAPTCHA v2 Form Daftar (Indeks 1)
+            if (typeof grecaptcha !== 'undefined' && document.querySelectorAll('.g-recaptcha iframe')) {
                 const captchaResponse = grecaptcha.getResponse(1);
                 if (!captchaResponse) {
                     alert("Harap centang verifikasi Keamanan (reCAPTCHA) untuk mendaftar!");
@@ -342,7 +340,7 @@
             let pass = document.getElementById("reg-pass").value;
 
             if (user === "" || email === "" || pass.length < 6) {
-                alert("Harap isi username, email, dan password (minimal 6 karakter, ketentuan Firebase Auth).");
+                alert("Harap isi username, email, and password (minimal 6 karakter, ketentuan Firebase Auth).");
                 return;
             }
 
@@ -351,7 +349,7 @@
                 let unameSnap = await getDoc(usernameRef);
                 if (unameSnap.exists()) {
                     alert("Username tersebut sudah terpakai!");
-                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
+                    if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                     return;
                 }
 
@@ -365,9 +363,9 @@
                 document.getElementById("reg-user").value = "";
                 document.getElementById("reg-email").value = "";
                 document.getElementById("reg-pass").value = "";
-                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
+                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
             } catch (e) {
-                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(1);
+                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                 let pesan = e.message;
                 if (e.code === "auth/email-already-in-use") pesan = "Email tersebut sudah terdaftar.";
                 if (e.code === "auth/weak-password") pesan = "Password terlalu lemah (minimal 6 karakter).";
@@ -384,8 +382,8 @@
                 return;
             }
 
-            // Pengaman Utama: Cek verifikasi reCAPTCHA v2 Form Login (Indeks 0)
-            if (typeof grecaptcha !== 'undefined') {
+            // INTEGRASI KEAMANAN: Memvalidasi reCAPTCHA v2 Form Login (Indeks 0)
+            if (typeof grecaptcha !== 'undefined' && document.querySelectorAll('.g-recaptcha iframe')) {
                 const captchaResponse = grecaptcha.getResponse(0);
                 if (!captchaResponse) {
                     alert("Harap centang verifikasi Keamanan (reCAPTCHA) terlebih dahulu!");
@@ -413,9 +411,9 @@
                 jumlahPercobaanGagal = 0;
                 document.getElementById("login-user").value = "";
                 document.getElementById("login-pass").value = "";
-                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(0);
+                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
             } catch (e) {
-                if (typeof grecaptcha !== 'undefined') grecaptcha.reset(0);
+                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                 jumlahPercobaanGagal++;
                 if (e.code === "auth/too-many-requests") {
                     alert("Firebase mendeteksi terlalu banyak percobaan gagal pada akun ini. Coba lagi beberapa saat lagi.");
@@ -427,8 +425,7 @@
                 }
             }
         };
-                    // --- TAMPILKAN DASHBOARD ---
-        function tampilkanDashboard() {
+                    function tampilkanDashboard() {
             let badge = document.getElementById("current-user-badge");
             if (userAktif.role === "admin") {
                 badge.innerText = "Super Admin";
@@ -439,15 +436,12 @@
                 badge.classList.remove("admin-badge");
                 document.getElementById("admin-panel").style.display = "none";
             }
- 
             document.getElementById("auth-screen").style.display = "none";
             document.getElementById("main-app").style.display = "block";
- 
             segarkanAktivitasSesi();
             aktifkanRealtimeListenerFinansial();
         }
  
-        // --- MANAJEMEN MONITOR STATUS FIREBASE AUTH ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
@@ -464,25 +458,23 @@
                 }
             } else {
                 userAktif = null;
-                matikanSemuaListener();
+                matikanSemualistener();
                 clearTimeout(timerSesiOtomatis);
                 document.getElementById("main-app").style.display = "none";
                 document.getElementById("auth-screen").style.display = "flex";
             }
         });
  
-        // --- SINKRONISASI DATA EMISI CLOUD REALTIME ---
         let unsubscribeTransaksi = null;
         let unsubscribePengguna = null;
  
-        function matikanSemuaListener() {
+        function matikanSemualistener() {
             if (unsubscribeTransaksi) { unsubscribeTransaksi(); unsubscribeTransaksi = null; }
             if (unsubscribePengguna) { unsubscribePengguna(); unsubscribePengguna = null; }
         }
  
         function aktifkanRealtimeListenerFinansial() {
-            matikanSemuaListener(); 
- 
+            matikanSemualistener(); 
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
                 : query(collection(db, "transaksi"), where("pemilikUid", "==", userAktif.uid));
@@ -506,7 +498,7 @@
                 });
             }
         }
-                    // --- MANAJEMEN CRUD DATA TRANSAKSI ---
+ 
         window.eksekusiSimpanTransaksi = async function() {
             let targetId = document.getElementById("edit-target-id").value;
             let jenis = document.getElementById("tx-type").value;
@@ -535,12 +527,10 @@
                         nominal: nominal
                     });
                 }
- 
                 resetFormulirInput();
             } catch (e) { alert("Gagal menyimpan ke Cloud: " + e.message); }
         };
- 
-        window.triggerEditTransaksi = function(id) {
+                    window.triggerEditTransaksi = function(id) {
             let item = dataTransaksiGlobal.find(t => t.id == id);
             if (item) {
                 if (item.pemilikUid !== userAktif.uid && userAktif.role !== "admin") {
@@ -574,7 +564,6 @@
             }
         };
  
-        // --- OPERASIONAL KONTROL SUPER ADMIN ---
         window.hapusPenggunaOlehAdmin = async function(uid, username) {
             if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console.`)) return;
  
@@ -612,7 +601,6 @@
             } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
  
-        // --- SISTEM UTILITAS FORMAT & PENYEGARAN TAMPILAN ---
         function formatTanggal(ts) {
             if (!ts) return "Baru saja";
             return ts.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -624,7 +612,7 @@
             document.getElementById("tx-amount").value = "";
             document.getElementById("form-action-title").innerText = "Catat Transaksi Baru";
             document.getElementById("btn-main-action").innerText = "Amankan Transaksi";
-                    }
+                        }
                     function sinkronisasiVisualTampilan() {
             let saldoNetto = 0, masuk = 0, keluar = 0;
             let htmlPribadi = "";
@@ -716,7 +704,6 @@
             }
         }
  
-        // --- LOGOUT AMAN ---
         window.eksekusiLogoutSistem = async function() {
             try { await signOut(auth); } catch (e) { }
             clearTimeout(timerSesiOtomatis);
