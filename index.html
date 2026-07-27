@@ -19,12 +19,11 @@
             margin: 0; background-color: var(--bg-main); color: var(--text);
             font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 30px;
         }
-        
-        /* GERBANG SISTEM AUTENTIKASI - SIMETRIS FIX */
+
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-main); z-index: 100; display: flex;
-            flex-direction: column; justify-content: center; align-items: center; 
+            flex-direction: column; justify-content: center; align-items: center;
             padding: 15px; box-sizing: border-box; overflow-y: auto;
         }
         .auth-box {
@@ -37,18 +36,17 @@
         .auth-subtitle { font-size: 13px; color: var(--text-muted); text-transform: uppercase; text-align: center; margin-bottom: 25px; letter-spacing: 0.5px; }
         .auth-toggle-text { font-size: 13px; text-align: center; margin-top: 20px; color: var(--text-muted); }
         .auth-link { color: var(--primary); cursor: pointer; font-weight: 600; }
-        
-        /* DASHBOARD INDEKS UTAMA */
+
         #main-app { display: none; }
-        .header { 
-            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            display: flex; justify-content: space-between; align-items: center; 
+        .header {
+            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
         }
         .logo { font-size: 20px; font-weight: 800; }
         .logo span { color: var(--primary); }
         .user-badge { font-size: 12px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
         .admin-badge { background: rgba(168, 85, 247, 0.15); color: var(--admin-color); }
-        
+
         .header-right { display: flex; align-items: center; gap: 12px; }
         .btn-logout {
             background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25);
@@ -57,10 +55,9 @@
         }
 
         .app-container { padding: 0 20px; }
-        
-        /* PANEL MONITORING ADMIN */
+
         #admin-panel { display: none; margin-top: 25px; background: rgba(168, 85, 247, 0.03); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 20px; border-radius: 20px; }
-        
+
         .balance-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 24px;
@@ -79,13 +76,13 @@
         .section-title { font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-        
+
         input, select {
             width: 100%; box-sizing: border-box; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px; padding: 14px; color: var(--text); font-size: 15px; outline: none;
         }
         input:focus, select:focus { border-color: var(--primary); }
-        
+
         .btn-submit {
             width: 100%; background: linear-gradient(90deg, #0284c7, #0ea5e9); border: none; padding: 15px;
             color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
@@ -106,7 +103,7 @@
         .tx-amount { font-size: 15px; font-weight: 700; }
         .amt-inc { color: var(--success); }
         .amt-exp { color: var(--danger); }
-        
+
         .action-btns { display: flex; gap: 8px; }
         .btn-action { background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
         .btn-edit { color: var(--primary); }
@@ -115,22 +112,21 @@
     </style>
 </head>
 <body>
-    <!-- GERBANG UTAMA SISTEM AUTENTIKASI -->
     <div id="auth-screen">
         <!-- FORM LOGIN -->
         <div id="login-box" class="auth-box">
             <div class="auth-title">Nurlela<span>Finance</span></div>
             <div class="auth-subtitle">Firebase Real-time Wallet</div>
-            
+
             <div class="input-group">
                 <input type="text" id="login-user" placeholder="Username Anda" autocomplete="off">
             </div>
             <div class="input-group" style="margin-top: 15px;">
                 <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
             </div>
-            
+
             <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
-            
+
             <div class="auth-toggle-text">
                 Belum punya dompet? <span class="auth-link" onclick="beralihMenuAuth('daftar')">Daftar Akun Baru</span>
                 <br><br>
@@ -142,55 +138,41 @@
         <div id="register-box" class="auth-box" style="display: none;">
             <div class="auth-title">Create<span>Account</span></div>
             <div class="auth-subtitle">Daftarkan Akun</div>
-            
+
             <div class="input-group">
                 <input type="text" id="reg-user" placeholder="Buat Username Unik" autocomplete="off">
             </div>
             <div class="input-group" style="margin-top: 15px;">
-                <input type="password" id="reg-pass" placeholder="Buat Kata Sandi Kuat">
+                <input type="email" id="reg-email" placeholder="Email Aktif Anda" autocomplete="off">
             </div>
             <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reg-question" placeholder="Pertanyaan Pemulihan (Contoh: Nama Ibu?)">
+                <input type="password" id="reg-pass" placeholder="Buat Kata Sandi (min. 6 karakter)">
             </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reg-answer" placeholder="Jawaban Kunci Rahasia Anda">
-            </div>
-            
+
             <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
-            
+
             <div class="auth-toggle-text">
                 Sudah memiliki akses? <span class="auth-link" onclick="beralihMenuAuth('login')">Masuk Di Sini</span>
             </div>
         </div>
 
-        <!-- FORM RESET PASSWORD -->
+        <!-- FORM RESET PASSWORD (via email asli, dikelola Firebase Auth) -->
         <div id="reset-box" class="auth-box" style="display: none;">
             <div class="auth-title">Reset<span>Access</span></div>
-            <div class="auth-subtitle">Verifikasi Jawaban Kunci Cadangan</div>
-            
+            <div class="auth-subtitle">Kirim Link Reset ke Email Anda</div>
+
             <div class="input-group">
-                <input type="text" id="reset-user" placeholder="Masukkan Username Anda" autocomplete="off">
+                <input type="email" id="reset-email" placeholder="Masukkan Email Terdaftar" autocomplete="off">
             </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reset-question-prompt" placeholder="Pertanyaan Pemulihan" disabled style="background: rgba(255,255,255,0.02); color: #94a3b8;">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="reset-answer" placeholder="Masukkan Jawaban Kunci">
-            </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="password" id="reset-new-pass" placeholder="Buat Kata Sandi Baru">
-            </div>
-            
-            <button id="btn-check-user" class="btn-submit" style="margin-top: 20px; background: #475569;" onclick="verifikasiUsernameReset()">Cari Username</button>
-            <button id="btn-final-reset" class="btn-submit" style="margin-top: 10px; display: none;" onclick="eksekusiResetPassword()">Perbarui Kata Sandi</button>
-            
+
+            <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiKirimResetPassword()">Kirim Link Reset Password</button>
+
             <div class="auth-toggle-text">
                 Batal menyetel ulang? <span class="auth-link" onclick="beralihMenuAuth('login')">Kembali Login</span>
             </div>
         </div>
     </div>
 
-    <!-- INDEKS UTAMA DASHBOARD -->
     <div id="main-app">
         <div class="header">
             <div class="logo">Nurlela<span>Finance</span> <span id="current-user-badge" class="user-badge">User</span></div>
@@ -198,9 +180,8 @@
                 <button class="btn-logout" onclick="eksekusiLogoutSistem()">Keluar</button>
             </div>
         </div>
-        
+
         <div class="app-container">
-            <!-- PANEL PENGAWASAN RAHASIA SUPER ADMIN -->
             <div id="admin-panel">
                 <div class="section-title" style="color: var(--admin-color); display: flex; align-items: center; gap: 8px;">
                     🛡️ Pengawasan Manajemen Data Global
@@ -210,17 +191,15 @@
                 </div>
                 <div id="admin-global-log" class="tx-list"></div>
 
-                <!-- DAFTAR PENGGUNA TERDAFTAR -->
                 <div class="section-title" style="color: var(--admin-color); margin-top: 25px; display: flex; align-items: center; gap: 8px;">
-                    👥 Manajemen Akun & Atur Ulang Sandi Pengguna
+                    👥 Manajemen Akun Pengguna
                 </div>
                 <div style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">
-                    Berikut adalah daftar pengguna publik yang terdaftar di cloud Google. Admin berhak menghapus akun atau merestart kata sandi secara paksa.
+                    Admin dapat mengirim email reset password ke pengguna, atau menghapus profil akun mereka.
                 </div>
                 <div id="admin-user-list" class="tx-list"></div>
             </div>
 
-            <!-- RINGKASAN SALDO -->
             <div class="balance-card">
                 <div class="bal-label">Total Saldo</div>
                 <div class="bal-amount" id="total-balance">Rp 0</div>
@@ -242,11 +221,10 @@
                 </div>
             </div>
 
-            <!-- FORM CATAT TRANSAKSI -->
             <div class="form-section">
                 <div id="form-action-title" class="section-title">Catat Transaksi Baru</div>
                 <input type="hidden" id="edit-target-id" value="">
-                
+
                 <div class="input-group">
                     <label for="tx-type">Jenis Aliran Dana</label>
                     <select id="tx-type">
@@ -262,7 +240,7 @@
                     <label for="tx-amount">Nominal Uang (Rp)</label>
                     <input type="number" id="tx-amount" placeholder="0" inputmode="numeric">
                 </div>
-                
+
                 <button id="btn-main-action" class="btn-submit" onclick="eksekusiSimpanTransaksi()">Amankan Transaksi</button>
             </div>
 
@@ -273,35 +251,40 @@
         </div>
     </div>
 
-    <!-- IMPORT MODUL SDK FIREBASE CLOUD DARI CDN GOOGLE OFFICIAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+            onAuthStateChanged, signOut, sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
         // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
         const firebaseConfig = {
-    apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
-    authDomain: "nurlela-finance.firebaseapp.com",
-    databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "nurlela-finance",
-    storageBucket: "nurlela-finance.firebasestorage.app",
-    messagingSenderId: "829026126295",
-    appId: "1:829026126295:web:f0a9502df693164e10392",
-    measurementId: "G-5XXYFS9HGT"
-};
+            apiKey: "AIzaSyAMDypE07ktnQeaIl1lxUXk59Hj80Ij4",
+            authDomain: "nurlela-finance.firebaseapp.com",
+            databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nurlela-finance",
+            storageBucket: "nurlela-finance.firebasestorage.app",
+            messagingSenderId: "829026126295",
+            appId: "1:829026126295:web:f0a9502df693164e10392",
+            measurementId: "G-5XXYFS9HGT"
+        };
 
-        // Mengaktifkan koneksi server cloud Google Firebase
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         let userAktif = null;
         let dataTransaksiGlobal = [];
         let daftarPengguna = [];
-        let userTargetReset = null;
-        
+
         let jumlahPercobaanGagal = 0;
         let waktuKunciSampai = 0;
         let timerSesiOtomatis = null;
-        const WAKTU_KEDALUWARSA_SESI = 5 * 60 * 1000; 
+        const WAKTU_KEDALUWARSA_SESI = 5 * 60 * 1000;
 
         function saringInputJahat(teks) {
             let div = document.createElement('div');
@@ -313,13 +296,6 @@
             document.getElementById("login-box").style.display = menu === 'login' ? 'block' : 'none';
             document.getElementById("register-box").style.display = menu === 'daftar' ? 'block' : 'none';
             document.getElementById("reset-box").style.display = menu === 'reset' ? 'block' : 'none';
-            
-            if (menu === 'reset') {
-                document.getElementById("reset-user").disabled = false;
-                document.getElementById("reset-question-prompt").value = "";
-                document.getElementById("btn-check-user").style.display = "block";
-                document.getElementById("btn-final-reset").style.display = "none";
-            }
         };
 
         function segarkanAktivitasSesi() {
@@ -335,40 +311,49 @@
         window.addEventListener('touchstart', segarkanAktivitasSesi);
         window.addEventListener('click', segarkanAktivitasSesi);
         window.addEventListener('scroll', segarkanAktivitasSesi);
-        // --- SUBSISTEM REGISTER, LOGIN & RESET AKUN FIREBASE ---
+
+        // --- SUBSISTEM REGISTER (Firebase Authentication) ---
         window.eksekusiDaftarSistem = async function() {
             let user = saringInputJahat(document.getElementById("reg-user").value.trim().toLowerCase());
+            let email = document.getElementById("reg-email").value.trim();
             let pass = document.getElementById("reg-pass").value;
-            let ques = saringInputJahat(document.getElementById("reg-question").value.trim());
-            let ans = saringInputJahat(document.getElementById("reg-answer").value.trim().toLowerCase());
 
-            if (user === "" || pass.length < 4 || ques === "" || ans === "") {
-                alert("Harap isi seluruh kolom! Password minimal 4 karakter.");
-                return;
-            }
-            if (user === "admin") {
-                alert("Akses Ditolak: Username 'admin' dilindungi oleh sistem!");
+            if (user === "" || email === "" || pass.length < 6) {
+                alert("Harap isi username, email, dan password (minimal 6 karakter, ketentuan Firebase Auth).");
                 return;
             }
 
             try {
-                let userRef = doc(db, "pengguna", user);
-                let snap = await getDoc(userRef);
-                if (snap.exists()) {
+                // Cegah username dobel: cek dulu apakah sudah ada pemetaan usernames/{user}
+                let usernameRef = doc(db, "usernames", user);
+                let unameSnap = await getDoc(usernameRef);
+                if (unameSnap.exists()) {
                     alert("Username tersebut sudah terpakai!");
                     return;
                 }
 
-                await setDoc(userRef, { username: user, password: pass, pertanyaan: ques, jawaban: ans, role: "user" });
-                alert("Pendaftaran Berhasil! Silakan masuk ke dalam sistem.");
+                // Firebase Auth yang menyimpan & meng-hash password — tidak lagi di Firestore
+                let cred = await createUserWithEmailAndPassword(auth, email, pass);
+                let uid = cred.user.uid;
+
+                await setDoc(doc(db, "pengguna", uid), { username: user, email: email, role: "user" });
+                await setDoc(usernameRef, { email: email, uid: uid });
+
+                alert("Pendaftaran Berhasil! Anda otomatis masuk ke dalam sistem.");
                 document.getElementById("reg-user").value = "";
+                document.getElementById("reg-email").value = "";
                 document.getElementById("reg-pass").value = "";
-                document.getElementById("reg-question").value = "";
-                document.getElementById("reg-answer").value = "";
-                beralihMenuAuth('login');
-            } catch (e) { alert("Error Server Google: " + e.message); }
+                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+            } catch (e) {
+                let pesan = e.message;
+                if (e.code === "auth/email-already-in-use") pesan = "Email tersebut sudah terdaftar.";
+                if (e.code === "auth/weak-password") pesan = "Password terlalu lemah (minimal 6 karakter).";
+                if (e.code === "auth/invalid-email") pesan = "Format email tidak valid.";
+                alert("Gagal Mendaftar: " + pesan);
+            }
         };
 
+        // --- SUBSISTEM LOGIN (Firebase Authentication) ---
         window.eksekusiLoginSistem = async function() {
             if (Date.now() < waktuKunciSampai) {
                 let sisaWaktu = Math.ceil((waktuKunciSampai - Date.now()) / 1000);
@@ -380,54 +365,38 @@
             let pass = document.getElementById("login-pass").value;
 
             if (user === "" || pass === "") {
-               alert("Username dan Password wajib diisi!");
-   return;
+                alert("Username dan Password wajib diisi!");
+                return;
             }
- 
+
             try {
-                // Buat akun admin default HANYA jika belum pernah ada sama sekali (sekali seumur hidup project).
-                // Tidak lagi menimpa ulang password admin yang sudah diganti — itu backdoor lama yang berbahaya.
-                if (user === "admin") {
-                    let adminRef = doc(db, "pengguna", "admin");
-                    let checkAdmin = await getDoc(adminRef);
-                    if (!checkAdmin.exists()) {
-                        await setDoc(adminRef, { username: "admin", password: "admin123", pertanyaan: "Sandi Utama?", jawaban: "enterprise", role: "admin" });
-                        alert("PENTING: Akun admin dibuat dengan password default 'admin123'. Segera ganti password ini lewat menu Lupa Password setelah login pertama kali!");
-                    }
+                let unameSnap = await getDoc(doc(db, "usernames", user));
+                if (!unameSnap.exists()) {
+                    throw { code: "auth/user-not-found" };
                 }
- 
-                let userRef = doc(db, "pengguna", user);
-                let snap = await getDoc(userRef);
- 
-                if (snap.exists() && snap.data().password === pass) {
-                    jumlahPercobaanGagal = 0;
-                    userAktif = snap.data();
- 
-                    document.getElementById("login-user").value = "";
-                    document.getElementById("login-pass").value = "";
- 
-                    // Buat token sesi acak baru dan simpan di server, agar sesi tidak bisa dipalsukan
-                    // hanya dengan menebak/menulis username di localStorage.
-                    let tokenSesiBaru = crypto.randomUUID();
-                    await updateDoc(userRef, { sessionToken: tokenSesiBaru });
-                    userAktif.sessionToken = tokenSesiBaru;
- 
-                    // SIMPAN SESI: agar tidak logout otomatis saat halaman di-refresh
-                    localStorage.setItem("sesiAktifUsername", userAktif.username);
-                    localStorage.setItem("sesiAktifToken", tokenSesiBaru);
- 
-                    tampilkanDashboard();
+                let email = unameSnap.data().email;
+
+                // Verifikasi password dilakukan oleh Firebase Auth sendiri (bukan dibandingkan manual di JS)
+                await signInWithEmailAndPassword(auth, email, pass);
+
+                jumlahPercobaanGagal = 0;
+                document.getElementById("login-user").value = "";
+                document.getElementById("login-pass").value = "";
+                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+            } catch (e) {
+                jumlahPercobaanGagal++;
+                if (e.code === "auth/too-many-requests") {
+                    alert("Firebase mendeteksi terlalu banyak percobaan gagal pada akun ini. Coba lagi beberapa saat lagi.");
+                } else if (jumlahPercobaanGagal >= 3) {
+                    waktuKunciSampai = Date.now() + 30000;
+                    alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
                 } else {
-                    jumlahPercobaanGagal++;
-                    if (jumlahPercobaanGagal >= 3) {
-                        waktuKunciSampai = Date.now() + 30000;
-                        alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
-                    } else { alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`); }
+                    alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
                 }
-            } catch (e) { alert("Gagal terhubung ke Cloud: " + e.message); }
+            }
         };
  
-        // --- TAMPILKAN DASHBOARD (dipakai saat login manual maupun pemulihan sesi) ---
+        // --- TAMPILKAN DASHBOARD ---
         function tampilkanDashboard() {
             let badge = document.getElementById("current-user-badge");
             if (userAktif.role === "admin") {
@@ -447,53 +416,50 @@
             aktifkanRealtimeListenerFinansial();
         }
  
-        // --- PEMULIHAN SESI OTOMATIS SAAT HALAMAN DI-REFRESH ---
-        window.addEventListener("DOMContentLoaded", async () => {
-            let sesiTersimpan = localStorage.getItem("sesiAktifUsername");
-            let tokenTersimpan = localStorage.getItem("sesiAktifToken");
-            if (!sesiTersimpan || !tokenTersimpan) return;
- 
-            try {
-                let userRef = doc(db, "pengguna", sesiTersimpan);
-                let snap = await getDoc(userRef);
-                // Token harus cocok dengan yang tersimpan di server saat login.
-                // Ini mencegah orang lain masuk hanya dengan menulis username di localStorage.
-                if (snap.exists() && snap.data().sessionToken === tokenTersimpan) {
-                    userAktif = snap.data();
+        // --- SESI DIKELOLA LANGSUNG OLEH FIREBASE AUTH (aman, tidak bisa dipalsukan lewat localStorage) ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    let snap = await getDoc(doc(db, "pengguna", user.uid));
+                    if (!snap.exists()) {
+                        // Profil sudah dihapus (mis. oleh admin) tapi akun login masih ada — paksa keluar
+                        await signOut(auth);
+                        alert("Profil akun Anda tidak ditemukan. Silakan hubungi admin.");
+                        return;
+                    }
+                    userAktif = { uid: user.uid, ...snap.data() };
                     tampilkanDashboard();
-                } else {
-                    // Token tidak cocok / akun tidak ada, bersihkan sesi lama
-                    localStorage.removeItem("sesiAktifUsername");
-                    localStorage.removeItem("sesiAktifToken");
+                } catch (e) {
+                    console.error("Gagal memuat profil:", e.message);
                 }
-            } catch (e) {
-                console.error("Gagal memulihkan sesi:", e.message);
+            } else {
+                userAktif = null;
+                clearTimeout(timerSesiOtomatis);
+                document.getElementById("main-app").style.display = "none";
+                document.getElementById("auth-screen").style.display = "flex";
             }
         });
  
         // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
         function aktifkanRealtimeListenerFinansial() {
-            // Live Stream 1: Admin memantau SELURUH transaksi. User biasa hanya menerima transaksi
-            // miliknya sendiri dari server (bukan lagi seluruh data semua pengguna lalu difilter di browser).
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
-                : query(collection(db, "transaksi"), where("pemilik", "==", userAktif.username));
+                : query(collection(db, "transaksi"), where("pemilikUid", "==", userAktif.uid));
  
             onSnapshot(queryTransaksi, (snapshot) => {
                 dataTransaksiGlobal = [];
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
                 });
-                dataTransaksiGlobal.sort((a, b) => b.id - a.id); // Urutkan dari data paling baru
+                dataTransaksiGlobal.sort((a, b) => b.id - a.id);
                 sinkronisasiVisualTampilan();
             });
  
-            // Live Stream 2: Memantau seluruh akun pengguna terdaftar (Khusus Hak Akses Super Admin)
             if (userAktif.role === "admin") {
                 onSnapshot(collection(db, "pengguna"), (snapshot) => {
                     daftarPengguna = [];
                     snapshot.forEach((doc) => {
-                        daftarPengguna.push(doc.data());
+                        daftarPengguna.push({ uid: doc.id, ...doc.data() });
                     });
                     sinkronisasiVisualTampilan();
                 });
@@ -512,10 +478,12 @@
             }
  
             let idTransaksi = targetId === "" ? String(Date.now()) : targetId;
+            let itemLama = targetId === "" ? null : dataTransaksiGlobal.find(t => t.id === targetId);
  
             try {
                 await setDoc(doc(db, "transaksi", idTransaksi), {
-                    pemilik: targetId === "" ? userAktif.username : dataTransaksiGlobal.find(t => t.id === targetId).pemilik,
+                    pemilik: itemLama ? itemLama.pemilik : userAktif.username,
+                    pemilikUid: itemLama ? itemLama.pemilikUid : userAktif.uid,
                     jenis: jenis,
                     deskripsi: desc,
                     nominal: nominal,
@@ -525,10 +493,11 @@
                 resetFormulirInput();
             } catch (e) { alert("Gagal menyimpan ke Cloud: " + e.message); }
         };
+ 
         window.triggerEditTransaksi = function(id) {
             let item = dataTransaksiGlobal.find(t => t.id == id);
             if (item) {
-                if (item.pemilik !== userAktif.username && userAktif.role !== "admin") {
+                if (item.pemilikUid !== userAktif.uid && userAktif.role !== "admin") {
                     alert("Akses Mengubah Data Ditolak!");
                     return;
                 }
@@ -546,7 +515,7 @@
             let item = dataTransaksiGlobal.find(t => t.id == id);
             if (!item) return;
  
-            if (item.pemilik !== userAktif.username && userAktif.role !== "admin") {
+            if (item.pemilikUid !== userAktif.uid && userAktif.role !== "admin") {
                 alert("Akses Menghapus Data Ditolak!");
                 return;
             }
@@ -559,76 +528,47 @@
             }
         };
  
-        window.hapusPenggunaOlehAdmin = async function(username) {
-            if (username === "admin") {
-                alert("Aksi Ditolak: Tidak bisa menghapus akun Super Admin!");
-                return;
-            }
- 
-            if (confirm(`Peringatan: Hapus permanen akun user [@${username}] beserta seluruh riwayat transaksinya dari Cloud?`)) {
-                try {
-                    await deleteDoc(doc(db, "pengguna", username));
-                    let userTx = dataTransaksiGlobal.filter(t => t.pemilik === username);
-                    for (let tx of userTx) {
-                        await deleteDoc(doc(db, "transaksi", tx.id));
-                    }
-                    alert(`Akun [@${username}] berhasil dieliminasi.`);
-                } catch (e) { alert("Gagal menghapus user: " + e.message); }
-            }
-        };
- 
-        window.resetPasswordUserOlehAdmin = async function(username) {
-            let passwordBaru = prompt(`Masukkan Kata Sandi Baru untuk [@${username}]:`);
-            if (passwordBaru === null) return;
- 
-            if (passwordBaru.trim().length < 4) {
-                alert("Gagal: Kata sandi minimal 4 karakter!");
-                return;
-            }
+        // Menghapus PROFIL & data user. Akun login (email/password) di Firebase Auth tetap ada
+        // dan hanya bisa dihapus permanen lewat Firebase Console > Authentication (butuh Admin SDK untuk otomatisasi).
+        window.hapusPenggunaOlehAdmin = async function(uid, username) {
+            if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console > Authentication.`)) return;
  
             try {
-                // sessionToken dikosongkan agar sesi lama user tersebut (jika sedang login di perangkat lain) otomatis ter-logout
-                await updateDoc(doc(db, "pengguna", username), { password: passwordBaru.trim(), sessionToken: "" });
-                alert(`Sukses: Kata sandi [@${username}] berhasil di-reset.`);
-            } catch (e) { alert("Gagal merestart sandi: " + e.message); }
-        };
+                await deleteDoc(doc(db, "pengguna", uid));
+                await deleteDoc(doc(db, "usernames", username));
  
-        window.verifikasiUsernameReset = async function() {
-            let user = document.getElementById("reset-user").value.trim().toLowerCase();
-            try {
-                let snap = await getDoc(doc(db, "pengguna", user));
-                if (!snap.exists()) {
-                    alert("Username tidak ditemukan!");
-                    return;
+                let userTx = dataTransaksiGlobal.filter(t => t.pemilikUid === uid);
+                for (let tx of userTx) {
+                    await deleteDoc(doc(db, "transaksi", tx.id));
                 }
-                userTargetReset = snap.data();
-                document.getElementById("reset-user").disabled = true;
-                document.getElementById("reset-question-prompt").value = userTargetReset.pertanyaan;
-                document.getElementById("btn-check-user").style.display = "none";
-                document.getElementById("btn-final-reset").style.display = "block";
-            } catch (e) { alert("Error: " + e.message); }
+                alert(`Profil [@${username}] berhasil dihapus.`);
+            } catch (e) { alert("Gagal menghapus user: " + e.message); }
         };
  
-        window.eksekusiResetPassword = async function() {
-            let ans = document.getElementById("reset-answer").value.trim().toLowerCase();
-            let newPass = document.getElementById("reset-new-pass").value;
+        // Admin tidak lagi bisa menyetel password user lain secara langsung (memang tidak diizinkan
+        // Firebase Auth tanpa server Admin SDK). Sebagai gantinya, admin memicu email reset resmi.
+        window.kirimResetPasswordOlehAdmin = async function(email, username) {
+            if (!confirm(`Kirim email reset password ke [@${username}] (${email})?`)) return;
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert(`Email reset password terkirim ke ${username}.`);
+            } catch (e) { alert("Gagal mengirim: " + e.message); }
+        };
  
-            if (ans === "" || newPass.length < 4) {
-                alert("Isian kolom wajib diisi valid!");
+        window.eksekusiKirimResetPassword = async function() {
+            let email = document.getElementById("reset-email").value.trim();
+            if (email === "") {
+                alert("Masukkan email terdaftar Anda.");
                 return;
             }
- 
-            if (ans === userTargetReset.jawaban) {
-                try {
-                    await updateDoc(doc(db, "pengguna", userTargetReset.username), { password: newPass, sessionToken: "" });
-                    alert("Password berhasil diperbarui! Silakan login.");
-                    document.getElementById("reset-user").value = "";
-                    document.getElementById("reset-answer").value = "";
-                    document.getElementById("reset-new-pass").value = "";
-                    beralihMenuAuth('login');
-                } catch (e) { alert("Gagal memperbarui: " + e.message); }
-            } else { alert("Jawaban Kunci Pemulihan Salah!"); }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Link reset password telah dikirim ke email Anda. Silakan cek inbox (atau folder spam).");
+                document.getElementById("reset-email").value = "";
+                beralihMenuAuth('login');
+            } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
+ 
         function resetFormulirInput() {
             document.getElementById("edit-target-id").value = "";
             document.getElementById("tx-desc").value = "";
@@ -643,7 +583,7 @@
             let htmlAdminGlobal = "";
             let htmlUserList = "";
  
-            let dataPribadi = dataTransaksiGlobal.filter(t => t.pemilik === userAktif.username);
+            let dataPribadi = dataTransaksiGlobal.filter(t => t.pemilikUid === userAktif.uid);
  
             if (dataPribadi.length === 0) {
                 htmlPribadi = '<div class="no-data">Belum ada catatan transaksi aman Anda.</div>';
@@ -705,20 +645,20 @@
                 }
                 document.getElementById("admin-global-log").innerHTML = htmlAdminGlobal;
  
-                let userPublik = daftarPengguna.filter(u => u.username !== "admin");
+                let userPublik = daftarPengguna.filter(u => u.uid !== userAktif.uid);
                 if (userPublik.length === 0) {
-                    htmlUserList = '<div class="no-data">Belum ada pengguna publik terdaftar.</div>';
+                    htmlUserList = '<div class="no-data">Belum ada pengguna lain terdaftar.</div>';
                 } else {
                     userPublik.forEach(u => {
                         htmlUserList += `
                             <div class="tx-item" style="border: 1px solid rgba(168, 85, 247, 0.2); display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
                                 <div class="tx-left" style="width: 100%;">
                                     <div class="tx-desc" style="color: var(--primary); font-size: 16px;">@${u.username}</div>
-                                    <div class="tx-date" style="margin-top:4px; color: var(--text-muted);">Pertanyaan: ${u.pertanyaan}</div>
+                                    <div class="tx-date" style="margin-top:4px; color: var(--text-muted);">${u.email}</div>
                                 </div>
                                 <div class="action-btns" style="width: 100%; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
-                                    <button class="btn-action btn-edit" style="font-size:12px; font-weight:bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="resetPasswordUserOlehAdmin('${u.username}')">Reset PW ⚙️</button>
-                                    <button class="btn-action btn-del" style="font-size:12px; font-weight:bold; background: rgba(244, 63, 94, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="hapusPenggunaOlehAdmin('${u.username}')">Hapus Akun ✕</button>
+                                    <button class="btn-action btn-edit" style="font-size:12px; font-weight:bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="kirimResetPasswordOlehAdmin('${u.email}','${u.username}')">Kirim Reset PW ⚙️</button>
+                                    <button class="btn-action btn-del" style="font-size:12px; font-weight:bold; background: rgba(244, 63, 94, 0.1); padding: 6px 12px; border-radius: 8px;" onclick="hapusPenggunaOlehAdmin('${u.uid}','${u.username}')">Hapus Akun ✕</button>
                                 </div>
                             </div>
                         `;
@@ -729,15 +669,8 @@
         }
  
         window.eksekusiLogoutSistem = async function() {
-            if (userAktif) {
-                try { await updateDoc(doc(db, "pengguna", userAktif.username), { sessionToken: "" }); } catch (e) { /* abaikan jika gagal, tetap logout di browser */ }
-            }
-            userAktif = null;
-            localStorage.removeItem("sesiAktifUsername");
-            localStorage.removeItem("sesiAktifToken");
+            try { await signOut(auth); } catch (e) { /* abaikan, tetap kembali ke layar login */ }
             clearTimeout(timerSesiOtomatis);
-            document.getElementById("main-app").style.display = "none";
-            document.getElementById("auth-screen").style.display = "flex";
             beralihMenuAuth('login');
             resetFormulirInput();
         };
