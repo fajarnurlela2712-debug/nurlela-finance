@@ -115,7 +115,7 @@
     <div id="auth-screen">
         <!-- FORM LOGIN -->
         <div id="login-box" class="auth-box">
-            <div class="auth-title">Nurlela<span>Finance</span></div>
+            <div class="auth-title">Nurlela <span> Finance</span></div>
             <div class="auth-subtitle">Firebase Real-time Wallet</div>
 
             <div class="input-group">
@@ -261,7 +261,6 @@
             getFirestore, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
         const firebaseConfig = {
             apiKey: "AIzaSyAMdyppEQO7kthQeaILllxUXkS9hj0e0j4",
             authDomain: "nurlela-finance.firebaseapp.com",
@@ -324,7 +323,6 @@
             }
 
             try {
-                // Cegah username dobel: cek dulu apakah sudah ada pemetaan usernames/{user}
                 let usernameRef = doc(db, "usernames", user);
                 let unameSnap = await getDoc(usernameRef);
                 if (unameSnap.exists()) {
@@ -332,7 +330,6 @@
                     return;
                 }
 
-                // Firebase Auth yang menyimpan & meng-hash password — tidak lagi di Firestore
                 let cred = await createUserWithEmailAndPassword(auth, email, pass);
                 let uid = cred.user.uid;
 
@@ -343,7 +340,7 @@
                 document.getElementById("reg-user").value = "";
                 document.getElementById("reg-email").value = "";
                 document.getElementById("reg-pass").value = "";
-                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+                
             } catch (e) {
                 let pesan = e.message;
                 if (e.code === "auth/email-already-in-use") pesan = "Email tersebut sudah terdaftar.";
@@ -353,7 +350,7 @@
             }
         };
 
-        // --- SUBSISTEM LOGIN (Firebase Authentication) ---
+        
         window.eksekusiLoginSistem = async function() {
             if (Date.now() < waktuKunciSampai) {
                 let sisaWaktu = Math.ceil((waktuKunciSampai - Date.now()) / 1000);
@@ -376,13 +373,12 @@
                 }
                 let email = unameSnap.data().email;
 
-                // Verifikasi password dilakukan oleh Firebase Auth sendiri (bukan dibandingkan manual di JS)
                 await signInWithEmailAndPassword(auth, email, pass);
 
                 jumlahPercobaanGagal = 0;
                 document.getElementById("login-user").value = "";
                 document.getElementById("login-pass").value = "";
-                // onAuthStateChanged akan menampilkan dashboard secara otomatis
+                
             } catch (e) {
                 jumlahPercobaanGagal++;
                 if (e.code === "auth/too-many-requests") {
@@ -416,13 +412,11 @@
             aktifkanRealtimeListenerFinansial();
         }
  
-        // --- SESI DIKELOLA LANGSUNG OLEH FIREBASE AUTH (aman, tidak bisa dipalsukan lewat localStorage) ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     let snap = await getDoc(doc(db, "pengguna", user.uid));
                     if (!snap.exists()) {
-                        // Profil sudah dihapus (mis. oleh admin) tapi akun login masih ada — paksa keluar
                         await signOut(auth);
                         alert("Profil akun Anda tidak ditemukan. Silakan hubungi admin.");
                         return;
@@ -453,7 +447,7 @@
         }
  
         function aktifkanRealtimeListenerFinansial() {
-            matikanSemuaListener(); // pastikan tidak ada listener lama yang masih aktif sebelum pasang yang baru
+            matikanSemuaListener();
  
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
@@ -464,7 +458,7 @@
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
                 });
-                // ID dokumen sekarang acak (bukan Date.now()), jadi urutkan berdasarkan tanggal server, bukan ID
+                
                 dataTransaksiGlobal.sort((a, b) => (b.tanggal?.toMillis() || 0) - (a.tanggal?.toMillis() || 0));
                 sinkronisasiVisualTampilan();
             });
@@ -493,8 +487,6 @@
  
             try {
                 if (targetId === "") {
-                    // Transaksi baru: ID dokumen dibuat otomatis oleh Firestore (acak, tidak akan tabrakan),
-                    // dan tanggal diambil dari jam SERVER (bukan jam HP user yang bisa disetel sembarangan).
                     await addDoc(collection(db, "transaksi"), {
                         pemilik: userAktif.username,
                         pemilikUid: userAktif.uid,
@@ -590,9 +582,8 @@
                 beralihMenuAuth('login');
             } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
- 
-        // tanggal sekarang berupa Firestore Timestamp (dari serverTimestamp()), bukan teks biasa.
-        // Sesaat setelah dibuat (sebelum server konfirmasi), nilainya bisa null dulu — ditangani di sini.
+
+    
         function formatTanggal(ts) {
             if (!ts) return "Baru saja";
             return ts.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -698,7 +689,7 @@
         }
  
         window.eksekusiLogoutSistem = async function() {
-            try { await signOut(auth); } catch (e) { /* abaikan, tetap kembali ke layar login */ }
+            try { await signOut(auth); } catch (e) 
             clearTimeout(timerSesiOtomatis);
             beralihMenuAuth('login');
             resetFormulirInput();
