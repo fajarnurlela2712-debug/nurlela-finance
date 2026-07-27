@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nurlela Finance - Firebase Enterprise Wallet</title>
-    <!-- Tambahan: Skrip Google reCAPTCHA -->
-    <script src="https://google.com" async defer></script>
     <style>
         :root {
             --bg-main: #060913;
@@ -111,9 +109,6 @@
         .btn-edit { color: var(--primary); }
         .btn-del { color: var(--danger); }
         .no-data { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
-        
-        /* Tambahan wadah agar posisi captcha rapi di HP */
-        .g-recaptcha { margin: 15px 0; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
@@ -129,9 +124,6 @@
             <div class="input-group" style="margin-top: 15px;">
                 <input type="password" id="login-pass" placeholder="Kata Sandi Keamanan">
             </div>
-
-            <!-- Tambahan Wadah Captcha Login -->
-            <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
 
             <button id="btn-login" class="btn-submit" style="margin-top: 20px;" onclick="eksekusiLoginSistem()">Masuk Sesi Aman</button>
 
@@ -157,16 +149,14 @@
                 <input type="password" id="reg-pass" placeholder="Buat Kata Sandi (min. 6 karakter)">
             </div>
 
-            <!-- Tambahan Wadah Captcha Daftar -->
-            <div class="g-recaptcha" data-sitekey="6Ldb_GctAAAAAE9vWVBzjYPJ_n_kC1u53FpvgV44"></div>
-
             <button class="btn-submit" style="margin-top: 20px;" onclick="eksekusiDaftarSistem()">Konfirmasi Pembuatan</button>
 
             <div class="auth-toggle-text">
                 Sudah memiliki akses? <span class="auth-link" onclick="beralihMenuAuth('login')">Masuk Di Sini</span>
             </div>
         </div>
-                <!-- FORM RESET PASSWORD -->
+
+        <!-- FORM RESET PASSWORD (via email asli, dikelola Firebase Auth) -->
         <div id="reset-box" class="auth-box" style="display: none;">
             <div class="auth-title">Reset<span>Access</span></div>
             <div class="auth-subtitle">Kirim Link Reset ke Email Anda</div>
@@ -260,21 +250,22 @@
             </div>
         </div>
     </div>
-        <script type="module">
-        import { initializeApp } from "https://gstatic.com";
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import {
             getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
             onAuthStateChanged, signOut, sendPasswordResetEmail
-        } from "https://gstatic.com";
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import {
             getFirestore, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot, serverTimestamp
-        } from "https://gstatic.com";
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- KONFIGURASI INTEGRASI FIREBASE GOOGLE REAL-TIME ---
         const firebaseConfig = {
             apiKey: "AIzaSyAMdyppEQO7kthQeaILllxUXkS9hj0e0j4",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebasedatabase.app",
+            authDomain: "nurlela-finance.firebaseapp.com",
+            databaseURL: "https://nurlela-finance-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "nurlela-finance",
             storageBucket: "nurlela-finance.firebasestorage.app",
             messagingSenderId: "829026126295",
@@ -305,9 +296,6 @@
             document.getElementById("login-box").style.display = menu === 'login' ? 'block' : 'none';
             document.getElementById("register-box").style.display = menu === 'daftar' ? 'block' : 'none';
             document.getElementById("reset-box").style.display = menu === 'reset' ? 'block' : 'none';
-            
-            // Aturan Reset Captcha agar tidak eror token kedaluwarsa saat pindah form
-            if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
         };
 
         function segarkanAktivitasSesi() {
@@ -326,33 +314,25 @@
 
         // --- SUBSISTEM REGISTER (Firebase Authentication) ---
         window.eksekusiDaftarSistem = async function() {
-            // INTEGRASI KEAMANAN: Memvalidasi reCAPTCHA v2 Form Daftar (Indeks 1)
-            if (typeof grecaptcha !== 'undefined' && document.querySelectorAll('.g-recaptcha iframe')) {
-                const captchaResponse = grecaptcha.getResponse(1);
-                if (!captchaResponse) {
-                    alert("Harap centang verifikasi Keamanan (reCAPTCHA) untuk mendaftar!");
-                    return;
-                }
-            }
-
             let user = saringInputJahat(document.getElementById("reg-user").value.trim().toLowerCase());
             let email = document.getElementById("reg-email").value.trim();
             let pass = document.getElementById("reg-pass").value;
 
             if (user === "" || email === "" || pass.length < 6) {
-                alert("Harap isi username, email, and password (minimal 6 karakter, ketentuan Firebase Auth).");
+                alert("Harap isi username, email, dan password (minimal 6 karakter, ketentuan Firebase Auth).");
                 return;
             }
 
             try {
+                // Cegah username dobel: cek dulu apakah sudah ada pemetaan usernames/{user}
                 let usernameRef = doc(db, "usernames", user);
                 let unameSnap = await getDoc(usernameRef);
                 if (unameSnap.exists()) {
                     alert("Username tersebut sudah terpakai!");
-                    if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                     return;
                 }
 
+                // Firebase Auth yang menyimpan & meng-hash password — tidak lagi di Firestore
                 let cred = await createUserWithEmailAndPassword(auth, email, pass);
                 let uid = cred.user.uid;
 
@@ -363,9 +343,8 @@
                 document.getElementById("reg-user").value = "";
                 document.getElementById("reg-email").value = "";
                 document.getElementById("reg-pass").value = "";
-                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
+                // onAuthStateChanged akan menampilkan dashboard secara otomatis
             } catch (e) {
-                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                 let pesan = e.message;
                 if (e.code === "auth/email-already-in-use") pesan = "Email tersebut sudah terdaftar.";
                 if (e.code === "auth/weak-password") pesan = "Password terlalu lemah (minimal 6 karakter).";
@@ -380,15 +359,6 @@
                 let sisaWaktu = Math.ceil((waktuKunciSampai - Date.now()) / 1000);
                 alert(`Sistem Dibekukan! Silakan tunggu ${sisaWaktu} detik lagi.`);
                 return;
-            }
-
-            // INTEGRASI KEAMANAN: Memvalidasi reCAPTCHA v2 Form Login (Indeks 0)
-            if (typeof grecaptcha !== 'undefined' && document.querySelectorAll('.g-recaptcha iframe')) {
-                const captchaResponse = grecaptcha.getResponse(0);
-                if (!captchaResponse) {
-                    alert("Harap centang verifikasi Keamanan (reCAPTCHA) terlebih dahulu!");
-                    return;
-                }
             }
 
             let user = document.getElementById("login-user").value.trim().toLowerCase();
@@ -406,14 +376,14 @@
                 }
                 let email = unameSnap.data().email;
 
+                // Verifikasi password dilakukan oleh Firebase Auth sendiri (bukan dibandingkan manual di JS)
                 await signInWithEmailAndPassword(auth, email, pass);
 
                 jumlahPercobaanGagal = 0;
                 document.getElementById("login-user").value = "";
                 document.getElementById("login-pass").value = "";
-                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
+                // onAuthStateChanged akan menampilkan dashboard secara otomatis
             } catch (e) {
-                if (typeof grecaptcha !== 'undefined') { grecaptcha.reset(); }
                 jumlahPercobaanGagal++;
                 if (e.code === "auth/too-many-requests") {
                     alert("Firebase mendeteksi terlalu banyak percobaan gagal pada akun ini. Coba lagi beberapa saat lagi.");
@@ -421,11 +391,13 @@
                     waktuKunciSampai = Date.now() + 30000;
                     alert("Cyber Guard: 3x Salah Password! Akses login dibekukan selama 30 detik.");
                 } else {
-                    alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
+          alert(`Username atau Password salah! Sisa kesempatan: ${3 - jumlahPercobaanGagal}x.`);
                 }
             }
         };
-                    function tampilkanDashboard() {
+ 
+        // --- TAMPILKAN DASHBOARD ---
+        function tampilkanDashboard() {
             let badge = document.getElementById("current-user-badge");
             if (userAktif.role === "admin") {
                 badge.innerText = "Super Admin";
@@ -436,17 +408,21 @@
                 badge.classList.remove("admin-badge");
                 document.getElementById("admin-panel").style.display = "none";
             }
+ 
             document.getElementById("auth-screen").style.display = "none";
             document.getElementById("main-app").style.display = "block";
+ 
             segarkanAktivitasSesi();
             aktifkanRealtimeListenerFinansial();
         }
  
+        // --- SESI DIKELOLA LANGSUNG OLEH FIREBASE AUTH (aman, tidak bisa dipalsukan lewat localStorage) ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     let snap = await getDoc(doc(db, "pengguna", user.uid));
                     if (!snap.exists()) {
+                        // Profil sudah dihapus (mis. oleh admin) tapi akun login masih ada — paksa keluar
                         await signOut(auth);
                         alert("Profil akun Anda tidak ditemukan. Silakan hubungi admin.");
                         return;
@@ -458,23 +434,27 @@
                 }
             } else {
                 userAktif = null;
-                matikanSemualistener();
+                matikanSemuaListener();
                 clearTimeout(timerSesiOtomatis);
                 document.getElementById("main-app").style.display = "none";
                 document.getElementById("auth-screen").style.display = "flex";
             }
         });
  
+        // --- REAL-TIME DATA STREAM SYNCHRONIZATION ---
+        // Menyimpan fungsi "matikan listener" agar bisa dipanggil saat logout —
+        // mencegah listener lama menumpuk kalau user logout-login berkali-kali.
         let unsubscribeTransaksi = null;
         let unsubscribePengguna = null;
  
-        function matikanSemualistener() {
+        function matikanSemuaListener() {
             if (unsubscribeTransaksi) { unsubscribeTransaksi(); unsubscribeTransaksi = null; }
             if (unsubscribePengguna) { unsubscribePengguna(); unsubscribePengguna = null; }
         }
  
         function aktifkanRealtimeListenerFinansial() {
-            matikanSemualistener(); 
+            matikanSemuaListener(); // pastikan tidak ada listener lama yang masih aktif sebelum pasang yang baru
+ 
             let queryTransaksi = userAktif.role === "admin"
                 ? collection(db, "transaksi")
                 : query(collection(db, "transaksi"), where("pemilikUid", "==", userAktif.uid));
@@ -484,6 +464,7 @@
                 snapshot.forEach((doc) => {
                     dataTransaksiGlobal.push({ id: doc.id, ...doc.data() });
                 });
+                // ID dokumen sekarang acak (bukan Date.now()), jadi urutkan berdasarkan tanggal server, bukan ID
                 dataTransaksiGlobal.sort((a, b) => (b.tanggal?.toMillis() || 0) - (a.tanggal?.toMillis() || 0));
                 sinkronisasiVisualTampilan();
             });
@@ -512,6 +493,8 @@
  
             try {
                 if (targetId === "") {
+                    // Transaksi baru: ID dokumen dibuat otomatis oleh Firestore (acak, tidak akan tabrakan),
+                    // dan tanggal diambil dari jam SERVER (bukan jam HP user yang bisa disetel sembarangan).
                     await addDoc(collection(db, "transaksi"), {
                         pemilik: userAktif.username,
                         pemilikUid: userAktif.uid,
@@ -521,16 +504,19 @@
                         tanggal: serverTimestamp()
                     });
                 } else {
+                    // Edit transaksi lama: tanggal asli dipertahankan, tidak ikut berubah saat diedit
                     await updateDoc(doc(db, "transaksi", targetId), {
                         jenis: jenis,
                         deskripsi: desc,
                         nominal: nominal
                     });
                 }
+ 
                 resetFormulirInput();
             } catch (e) { alert("Gagal menyimpan ke Cloud: " + e.message); }
         };
-                    window.triggerEditTransaksi = function(id) {
+ 
+        window.triggerEditTransaksi = function(id) {
             let item = dataTransaksiGlobal.find(t => t.id == id);
             if (item) {
                 if (item.pemilikUid !== userAktif.uid && userAktif.role !== "admin") {
@@ -564,8 +550,10 @@
             }
         };
  
+        // Menghapus PROFIL & data user. Akun login (email/password) di Firebase Auth tetap ada
+        // dan hanya bisa dihapus permanen lewat Firebase Console > Authentication (butuh Admin SDK untuk otomatisasi).
         window.hapusPenggunaOlehAdmin = async function(uid, username) {
-            if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console.`)) return;
+            if (!confirm(`Hapus profil & data [@${username}]? Catatan: akun login (email/password) tetap ada di sistem Auth, hanya bisa dihapus permanen lewat Firebase Console > Authentication.`)) return;
  
             try {
                 await deleteDoc(doc(db, "pengguna", uid));
@@ -579,6 +567,8 @@
             } catch (e) { alert("Gagal menghapus user: " + e.message); }
         };
  
+        // Admin tidak lagi bisa menyetel password user lain secara langsung (memang tidak diizinkan
+        // Firebase Auth tanpa server Admin SDK). Sebagai gantinya, admin memicu email reset resmi.
         window.kirimResetPasswordOlehAdmin = async function(email, username) {
             if (!confirm(`Kirim email reset password ke [@${username}] (${email})?`)) return;
             try {
@@ -595,12 +585,14 @@
             }
             try {
                 await sendPasswordResetEmail(auth, email);
-                alert("Link reset password telah dikirim ke email Anda. Silakan cek inbox.");
+                alert("Link reset password telah dikirim ke email Anda. Silakan cek inbox (atau folder spam).");
                 document.getElementById("reset-email").value = "";
                 beralihMenuAuth('login');
             } catch (e) { alert("Gagal mengirim: " + e.message); }
         };
  
+        // tanggal sekarang berupa Firestore Timestamp (dari serverTimestamp()), bukan teks biasa.
+        // Sesaat setelah dibuat (sebelum server konfirmasi), nilainya bisa null dulu — ditangani di sini.
         function formatTanggal(ts) {
             if (!ts) return "Baru saja";
             return ts.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -612,8 +604,9 @@
             document.getElementById("tx-amount").value = "";
             document.getElementById("form-action-title").innerText = "Catat Transaksi Baru";
             document.getElementById("btn-main-action").innerText = "Amankan Transaksi";
-                        }
-                    function sinkronisasiVisualTampilan() {
+        }
+ 
+        function sinkronisasiVisualTampilan() {
             let saldoNetto = 0, masuk = 0, keluar = 0;
             let htmlPribadi = "";
             let htmlAdminGlobal = "";
@@ -705,7 +698,7 @@
         }
  
         window.eksekusiLogoutSistem = async function() {
-            try { await signOut(auth); } catch (e) { }
+            try { await signOut(auth); } catch (e) { /* abaikan, tetap kembali ke layar login */ }
             clearTimeout(timerSesiOtomatis);
             beralihMenuAuth('login');
             resetFormulirInput();
